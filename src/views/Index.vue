@@ -50,6 +50,9 @@
         <div class="panel-header editor-header">
           <span class="panel-icon">📝</span>
           <span>编辑区域</span>
+          <div class="upload-picture" @click="openFileDialog" title="上传图片">
+            <img class="upload-icon" src="/upload-picture.svg" alt="上传图片">
+          </div>
         </div>
         <textarea
             v-model="markdownContent"
@@ -108,6 +111,7 @@ import html2pdf from 'html2pdf.js';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/rainbow.css';
 import { watch, nextTick } from 'vue';
+import compressImage from "../utils/compressor.ts";
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
   // @ts-ignore
@@ -116,7 +120,6 @@ marked.setOptions({
     return hljs.highlight(code, {language: validLanguage}).value;
   },
 });
-
 // 初始化Markdown内容
 const markdownContent = ref(`# 欢迎来到素笔 Mark !
 
@@ -184,6 +187,60 @@ const showCustomToast = (message: any, type = 'success') => {
     showToast.value = false;
   }, 3000);
 };
+
+const openFileDialog = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = handleFileSelect;
+  input.click();
+};
+
+// 处理文件选择（包含压缩逻辑）
+const handleFileSelect = async (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  try {
+    // 显示加载状态
+    isLoading.value = true;
+    showCustomToast('正在压缩图片...', 'success');
+
+    // 调用压缩函数
+    const compressedFile = await compressImage(
+        file,
+        0.7,    // 初始质量
+        1200,   // 最大宽度
+        100,    // 最小压缩尺寸(KB)
+        200     // 目标尺寸(KB)
+    );
+
+    // 读取压缩后的文件为DataURL
+    const reader = new FileReader();
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      const imageUrl = event.target?.result as string;
+      // 插入Markdown内容
+      const fileName = compressedFile.name.replace(/\.[^/.]+$/, '');
+      const imageMarkdown = `![${fileName}](${imageUrl})`;
+      markdownContent.value += `\n${imageMarkdown}`;
+      showCustomToast(`图片压缩成功，大小: ${(compressedFile.size / 1024).toFixed(2)}KB`);
+    };
+    reader.readAsDataURL(compressedFile);
+
+  } catch (error) {
+    console.error('图片处理失败:', error);
+    showCustomToast('图片压缩失败，请重试', 'error');
+  } finally {
+    // 关闭加载状态
+    isLoading.value = false;
+    // 清空input值，允许重复选择同一文件
+    target.value = '';
+  }
+};
+
+
 // 点击空白处关闭下拉菜单
 const handleClickOutside = (e: any) => {
   const dropdown = document.querySelector('.dropdown-menu');
@@ -569,6 +626,26 @@ onBeforeUnmount(() => {
   transition: all 0.3s;
 }
 
+.upload-picture {
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.upload-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.upload-picture:hover {
+  background-color: #d2d2d2;
+}
 /* 编辑器文本区域 */
 .editor-textarea {
   flex: 1;
@@ -742,7 +819,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 1000;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;

@@ -16,7 +16,8 @@
     "highlight.js": "^11.11.1",
     "html2pdf.js": "^0.10.3",
     "marked": "^16.1.1",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "compressorjs": "^1.2.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

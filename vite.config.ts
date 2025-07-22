@@ -14,7 +14,8 @@ export default defineConfig({
           html2pdf: ['html2pdf.js'],
           highlight: ['highlight.js'],
           marked: ['marked'],
-          dompurify: ['dompurify']
+          dompurify: ['dompurify'],
+          compressorjs: ['compressorjs']
         }
       }
     },
