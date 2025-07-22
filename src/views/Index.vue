@@ -98,10 +98,11 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+// @ts-ignore
 import html2pdf from 'html2pdf.js';
 // 引入highlight.js核心库和样式
 import hljs from 'highlight.js';
@@ -109,7 +110,8 @@ import 'highlight.js/styles/rainbow.css';
 import { watch, nextTick } from 'vue';
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
-  highlight: function (code, language) {
+  // @ts-ignore
+  highlight: function (code: any, language: any) {
     const validLanguage = hljs.getLanguage(language) ? language : 'javascript';
     return hljs.highlight(code, {language: validLanguage}).value;
   },
@@ -159,6 +161,7 @@ function greet() {
 
 // 渲染后的HTML（包含高亮处理）
 const renderedMarkdown = computed(() => {
+  // @ts-ignore
   return DOMPurify.sanitize(marked.parse(markdownContent.value));
 });
 
@@ -172,7 +175,7 @@ const toastMessage = ref('');
 const toastType = ref('success'); // success/error
 
 // 显示自定义弹窗
-const showCustomToast = (message, type = 'success') => {
+const showCustomToast = (message: any, type = 'success') => {
   toastMessage.value = message;
   toastType.value = type;
   showToast.value = true;
@@ -182,7 +185,7 @@ const showCustomToast = (message, type = 'success') => {
   }, 3000);
 };
 // 点击空白处关闭下拉菜单
-const handleClickOutside = (e) => {
+const handleClickOutside = (e: any) => {
   const dropdown = document.querySelector('.dropdown-menu');
   if (dropdown && !dropdown.contains(e.target)) {
     showDropdown.value = false;
@@ -209,7 +212,7 @@ const downloadMarkdown = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     showCustomToast('Markdown文件下载成功'); // 替换alert
-  } catch (error) {
+  } catch (error: any) {
     showCustomToast('下载失败：' + error.message, 'error'); // 替换alert
   }
 };
@@ -222,7 +225,7 @@ const downloadPdf = () => {
   const tempElement = document.createElement('div');
   tempElement.innerHTML = renderedMarkdown.value;
   tempElement.querySelectorAll('pre code').forEach((block) => {
-    hljs.highlightElement(block);
+    hljs.highlightElement(<HTMLElement>block);
   });
   tempElement.classList.add('hljs', 'rainbow');
   tempElement.style.maxWidth = '800px';
@@ -242,7 +245,7 @@ const downloadPdf = () => {
 
   html2pdf().from(tempElement).set(opt).save()
       .then(() => showCustomToast('PDF文件下载成功')) // 替换alert
-      .catch((error) => showCustomToast('PDF生成失败：' + error.message, 'error')) // 替换alert
+      .catch((error: any) => showCustomToast('PDF生成失败：' + error.message, 'error')) // 替换alert
       .finally(() => {
         document.body.removeChild(tempElement);
         isLoading.value = false;
@@ -254,7 +257,7 @@ watch(markdownContent, () => {
     const previewContainer = document.querySelector('.preview-content');
     if (previewContainer) {
       previewContainer.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightElement(block);
+        hljs.highlightElement(<HTMLElement>block);
       });
     }
   });
