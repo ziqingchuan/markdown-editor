@@ -356,6 +356,7 @@ onBeforeUnmount(() => {
   transition: background-color 0.3s, color 0.3s;
   background-color: #f5f5f5;
   color: #333333;
+  overflow-x: auto;
 }
 
 /* 暗黑模式 */
@@ -370,6 +371,7 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: all 0.3s;
   background-color: #ffffff;
+  width: 100%;
 }
 
 .app-dark .header {
@@ -635,13 +637,13 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-right: 15px;
-  padding-left: 15px;
 }
 
 .upload-icon {
   width: 20px;
   height: 20px;
+  padding: 0;
+  margin: 8px;
 }
 
 .upload-picture:hover {
