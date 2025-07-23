@@ -118,7 +118,7 @@
 }
 
 .app-dark :deep(pre) {
-    background-color: #4f4f4f;
+    background-color: #0a0a0a;
 }
 
 :deep(code) {
@@ -131,7 +131,7 @@
 }
 
 .app-dark :deep(code) {
-    background-color: #4f4f4f;
+    background-color: #0a0a0a;
 }
 
 :deep(pre code) {

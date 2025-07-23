@@ -209,17 +209,19 @@ marked.setOptions({
 // 初始化Markdown内容
 const markdownContent = ref(`# 欢迎来到素笔 Mark !
 
-这是一个基于Vue3的简易Markdown编辑器，支持：
+> 这是一个基于Vue3的简易Markdown编辑器，提供如下功能：
 
 - 实时预览
 - 明暗模式切换
-- 下载为Markdown文件
-- 下载为PDF文件
+- 同步跟随滚动
+- 导出md/pdf文件
 - 图片本地上传
-- 文件内容识别
+- 文件内容解析读取
 - 代码高亮
+- 快捷工具栏
+- 后续持续更新...
 
-[欢迎来我的博客看看](https://try-catch.life/)
+[欢迎来我的博客看看：try-catch.life](https://try-catch.life/)
 
 \`\`\`javascript
 function greet() {
@@ -488,7 +490,7 @@ const downloadMarkdown = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'document.md';
+    a.download = '素笔Mark导出文档.md';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -605,7 +607,7 @@ const downloadPdf = () => {
   // 5. PDF配置（保持现有逻辑）
   const opt = {
     margin: 10,
-    filename: 'document.pdf',
+    filename: '素笔Mark导出文档.pdf',
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
