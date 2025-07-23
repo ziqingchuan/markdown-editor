@@ -43,7 +43,35 @@
         </div>
       </div>
     </header>
-
+    <!-- 富文本操作工具栏 -->
+    <div
+        class="text-toolbar"
+        ref="toolbarRef"
+        :style="{ left: toolbarLeft + 'px', top: toolbarTop + 'px' }"
+        @mousedown="startDrag"
+    >
+      <button class="toolbar-btn" @click="formatText('bold')" title="加粗">
+        <img src="../assets/bold.svg" alt="加粗">
+      </button>
+      <button class="toolbar-btn" @click="formatText('italic')" title="斜体">
+        <img src="../assets/italic.svg" alt="斜体">
+      </button>
+      <button class="toolbar-btn" @click="formatText('underline')" title="下划线">
+        <img src="../assets/underline.svg" alt="下划线">
+      </button>
+      <button class="toolbar-btn" @click="formatText('link')" title="链接">
+        <img src="../assets/link.svg" alt="链接">
+      </button>
+      <button class="toolbar-btn" @click="formatText('code')" title="代码">
+        <img src="../assets/code.svg" alt="代码">
+      </button>
+      <button class="toolbar-btn" @click="formatText('quote')" title="引用">
+        <img src="../assets/quote.svg" alt="引用">
+      </button>
+      <button class="toolbar-btn" @click="formatText('list')" title="列表">
+        <img src="../assets/list.svg" alt="列表">
+      </button>
+    </div>
     <!-- 主内容区 -->
     <main class="main-content">
       <!-- 编辑器区域 -->
@@ -60,12 +88,21 @@
           <div class="upload-btn" @click="openFileDialog" title="解析文件">
             <img class="upload-icon" src="/upload-file.svg" alt="解析文件">
           </div>
+          <div class="upload-btn" @click="addCodeBlock" title="代码块">
+            <img class="upload-icon" src="/code-block.svg" alt="代码块">
+          </div>
+          <div class="upload-btn" @click="addTable" title="表格">
+            <img class="upload-icon" src="/table.svg" alt="表格">
+          </div>
         </div>
 
         <textarea
             v-model="markdownContent"
             class="editor-textarea"
-            placeholder="在此输入内容..."></textarea>
+            placeholder="在此输入内容..."
+            ref="editorRef"
+            @scroll="handleEditorScroll"
+        ></textarea>
       </div>
 
       <!-- 预览区域 -->
@@ -74,7 +111,11 @@
           <img class="panel-icon" src="/preview.svg" alt="预览">
           <span>预览区域</span>
         </div>
-        <div class="preview-content" v-html="renderedMarkdown"></div>
+        <div class="preview-content"
+             v-html="renderedMarkdown"
+             ref="previewRef"
+             @scroll="handlePreviewScroll"
+        ></div>
       </div>
     </main>
 
@@ -107,6 +148,42 @@
     </div>
     <div class="toast-message">{{ toastMessage }}</div>
   </div>
+
+  <!-- 表格配置弹窗 -->
+  <div class="table-modal-mask" v-if="showTableModal">
+    <div class="table-modal" :class="{ 'app-dark': isDarkMode }">
+      <div class="modal-header">
+        <h3>插入表格</h3>
+        <button class="modal-close" @click="showTableModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>行数：</label>
+          <input
+              type="number"
+              v-model.number="tableRows"
+              min="1"
+              max="20"
+              class="number-input"
+          >
+        </div>
+        <div class="form-group">
+          <label>列数：</label>
+          <input
+              type="number"
+              v-model.number="tableCols"
+              min="1"
+              max="10"
+              class="number-input"
+          >
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" @click="showTableModal = false">取消</button>
+        <button class="confirm-btn" @click="confirmTable">确认插入</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -120,7 +197,7 @@ import 'highlight.js/styles/rainbow.css';
 import { watch, nextTick } from 'vue';
 import compressImage from "../utils/compressor.ts";
 import {FileHandler} from "../utils/fileHandler.ts";
-
+import {syncScroll} from "../utils/handleScroll.ts";
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
   // @ts-ignore
@@ -164,6 +241,131 @@ const showDropdown = ref(false);
 const showToast = ref(false);// 弹窗状态
 const toastMessage = ref('');
 const toastType = ref('success'); // success/error
+// 获取DOM引用
+const editorRef = ref<HTMLTextAreaElement>();
+const previewRef = ref<HTMLDivElement>();
+// 用于防止滚动事件循环触发的标志
+const isSyncing = ref(false);
+// 工具栏相关状态
+const toolbarRef = ref<HTMLDivElement>();
+const isToolbarVisible = ref(false); // 工具栏是否显示
+const toolbarLeft = ref(0); // 工具栏左侧定位
+const toolbarTop = ref(0); // 工具栏顶部定位
+const isDragging = ref(false); // 是否正在拖拽
+const startX = ref(0); // 拖拽起始X坐标
+const startY = ref(0); // 拖拽起始Y坐标
+// 表格弹窗相关状态
+const showTableModal = ref(false); // 控制弹窗显示
+const tableRows = ref(3); // 默认3行
+const tableCols = ref(3); // 默认3列
+
+// 格式化选中文本（根据按钮类型添加对应的Markdown格式）
+const formatText = (type: 'bold' | 'italic' | 'underline' | 'link' | 'code' | 'quote' | 'list') => {
+  if (!editorRef.value) return;
+
+  const editor = editorRef.value;
+  const selection = window.getSelection();
+  if (!selection) {
+    isToolbarVisible.value = false;
+    return;
+  }
+
+  // 获取选中的文本和位置
+  const selectedText = selection.toString();
+  const startPos = editor.selectionStart;
+  const endPos = editor.selectionEnd;
+
+  // 根据类型添加对应的Markdown格式
+  let formattedText = '';
+  switch (type) {
+    case 'bold':
+      formattedText = `**${selectedText}**`;
+      break;
+    case 'italic':
+      formattedText = `*${selectedText}*`;
+      break;
+    case 'underline':
+      formattedText = `<u>${selectedText}</u>`; // Markdown原生不支持下划线，用HTML标签
+      break;
+    case 'link':
+      const linkText = selectedText || '链接文本';
+      formattedText = `[${linkText}](https://example.com)`; // 默认链接地址，可改为prompt输入
+      break;
+    case 'code':
+      formattedText = `\`${selectedText}\``; // 行内代码
+      break;
+    case 'quote':
+      formattedText = `> ${selectedText}`;
+      break;
+    case 'list':
+      formattedText = `- ${selectedText}`
+      break;
+  }
+
+  // 更新编辑器内容
+  markdownContent.value =
+      markdownContent.value.substring(0, startPos) +
+      formattedText +
+      markdownContent.value.substring(endPos);
+};
+
+const addCodeBlock = () => {
+  markdownContent.value += `\n\`\`\`javascript\n\n\`\`\``;
+}
+
+// 打开表格弹窗
+const addTable = () => {
+  showTableModal.value = true;
+  // 重置默认值（可选）
+  tableRows.value = 3;
+  tableCols.value = 3;
+};
+
+// 确认生成表格
+const confirmTable = () => {
+  if (!editorRef.value) return;
+
+  // 校验输入（至少1行1列）
+  if (tableRows.value < 1 || tableCols.value < 1) {
+    showCustomToast('行数和列数必须大于0', 'error');
+    return;
+  }
+
+  // 生成Markdown表格
+  const tableContent = generateMarkdownTable(
+      tableRows.value,
+      tableCols.value
+  );
+
+  // 插入表格到编辑器（光标位置）
+  const editor = editorRef.value;
+  const startPos = editor.selectionStart;
+  const endPos = editor.selectionEnd;
+  // 保留光标前后内容，插入表格
+  markdownContent.value =
+      markdownContent.value.substring(0, startPos) +
+      tableContent +
+      markdownContent.value.substring(endPos);
+
+  // 关闭弹窗并提示
+  showTableModal.value = false;
+  showCustomToast(`已插入 ${tableRows.value}行×${tableCols.value}列 表格`);
+};
+
+// 生成Markdown表格内容
+const generateMarkdownTable = (rows: number, cols: number) => {
+  // 表头行（如：| 列1 | 列2 | 列3 |）
+  const header = `| ${Array(cols).fill('列').map((_, i) => `列${i+1}`).join(' | ')} |`;
+  // 分隔行（如：| --- | --- | --- |）
+  const separator = `| ${Array(cols).fill('---').join(' | ')} |`;
+  // 内容行（如：| 内容 | 内容 | 内容 |）
+  const contentRows = Array(rows - 1) // 减去表头行
+      .fill('')
+      .map(() => `| ${Array(cols).fill('内容').join(' | ')} |`);
+
+  // 组合成完整表格（表头+分隔+内容行，每行换行）
+  return `\n${header}\n${separator}\n${contentRows.join('\n')}\n`;
+};
 
 // 显示自定义弹窗
 const showCustomToast = (message: any, type = 'success') => {
@@ -303,20 +505,104 @@ const downloadPdf = () => {
   isLoading.value = true;
 
   const tempElement = document.createElement('div');
+  // 1. 复制预览区内容
   tempElement.innerHTML = renderedMarkdown.value;
+
+  // 2. 手动注入所需样式（关键步骤）
+  const style = document.createElement('style');
+  style.textContent = `
+    /* 表格样式 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    th {
+      background-color: #f8f9fa;
+      color: #333;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border: 1px solid #e9ecef;
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border: 1px solid #e9ecef;
+      line-height: 1.5;
+    }
+    tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    /* 行内代码样式 */
+    code {
+      background-color: #f1f3f5;
+      color: #3a7bde;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 5px;
+    }
+
+    /* 代码块样式 */
+    pre {
+      background-color: #transparent;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    pre code {
+      background-color: transparent;
+      color: #333;
+      padding: 0;
+      font-size: 0.9em;
+      line-height: 1.5;
+    }
+
+    blockquote {
+      border-left: 4px solid #0d6ae3;
+      border-top: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      background-color: #f5f5f5;
+      padding: 1rem;
+      margin: 0 0 1rem 0;
+      color: #666;
+      border-radius: 0 6px 6px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    a {
+      color: #1a73e8;
+      text-decoration: none;
+    }
+    /* 基础样式 */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+  `;
+  tempElement.appendChild(style);
+
+  // 3. 代码高亮（保持现有逻辑）
   tempElement.querySelectorAll('pre code').forEach((block) => {
     hljs.highlightElement(<HTMLElement>block);
   });
-  tempElement.classList.add('hljs', 'rainbow');
+
+  // 4. 设置临时元素基础样式（移除强制白色背景的冲突代码）
   tempElement.style.maxWidth = '800px';
   tempElement.style.margin = '0 auto';
   tempElement.style.padding = '40px';
-  // tempElement.style.backgroundColor = isDarkMode.value ? '#1a1a1a' : '#ffffff'; // 调整pdf的背景色
-  tempElement.style.backgroundColor = '#ffffff'
-  // tempElement.style.color = isDarkMode.value ? '#e0e0e0' : '#333333'; // 调整pdf的字体色
-  tempElement.style.color = '#333333'
+  tempElement.style.backgroundColor = '#ffffff'; // 保持白色背景便于打印
+  tempElement.style.color = '#333333';
+
   document.body.appendChild(tempElement);
 
+  // 5. PDF配置（保持现有逻辑）
   const opt = {
     margin: 10,
     filename: 'document.pdf',
@@ -325,13 +611,23 @@ const downloadPdf = () => {
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
+  // 6. 生成并下载PDF
   html2pdf().from(tempElement).set(opt).save()
-      .then(() => showCustomToast('PDF文件下载成功')) // 替换alert
-      .catch((error: any) => showCustomToast('PDF生成失败：' + error.message, 'error')) // 替换alert
+      .then(() => showCustomToast('PDF文件下载成功'))
+      .catch((error: any) => showCustomToast('PDF生成失败：' + error.message, 'error'))
       .finally(() => {
         document.body.removeChild(tempElement);
         isLoading.value = false;
       });
+};
+// 编辑器滚动时同步到预览区（绑定到编辑器的scroll事件）
+const handleEditorScroll = () => {
+  syncScroll(editorRef, previewRef, isSyncing);
+};
+
+// 预览区滚动时同步到编辑器（绑定到预览区的scroll事件）
+const handlePreviewScroll = () => {
+  syncScroll(previewRef, editorRef, isSyncing);
 };
 
 // 监听代码块的高亮
@@ -347,617 +643,86 @@ watch(markdownContent, () => {
   });
 });
 
+// 开始拖拽（鼠标按下时）
+const startDrag = (e: MouseEvent) => {
+  // 为 event.target 指定类型为 HTMLElement
+  const target = e.target as HTMLElement;
+
+  // 只有点击工具栏或拖拽手柄时才触发拖拽
+  if (e.target === toolbarRef.value || (target && target.classList.contains('drag-handle'))) {
+    isDragging.value = true;
+    startX.value = e.clientX - toolbarLeft.value;
+    startY.value = e.clientY - toolbarTop.value;
+
+    // 添加鼠标移动和释放事件监听
+    document.addEventListener('mousemove', handleDrag);
+    document.addEventListener('mouseup', stopDrag);
+  }
+};
+// 拖拽中（鼠标移动时）
+const handleDrag = (e: MouseEvent) => {
+  if (!isDragging.value || !editorRef.value) return;
+
+  // 计算新位置（相对于编辑器容器）
+  let newLeft = e.clientX - startX.value;
+  let newTop = e.clientY - startY.value;
+  // 更新工具栏位置
+  toolbarLeft.value = newLeft;
+  toolbarTop.value = newTop;
+};
+
+// 结束拖拽（鼠标释放时）
+const stopDrag = () => {
+  if (isDragging.value) {
+    isDragging.value = false;
+    // 移除事件监听
+    document.removeEventListener('mousemove', handleDrag);
+    document.removeEventListener('mouseup', stopDrag);
+  }
+};
+
+// 计算工具栏初始位置（屏幕右下角）
+const initToolbarPosition = () => {
+
+  // 否则计算屏幕右下角位置
+  const toolbarWidth = 280;
+  const toolbarHeight = 140;
+  const margin = 0; // 距离屏幕边缘的间距
+
+  // 屏幕可用宽度和高度（减去滚动条和边缘间距）
+  const screenWidth = window.innerWidth - margin - toolbarWidth;
+  const screenHeight = window.innerHeight - margin - toolbarHeight;
+
+  // 设置初始位置为右下角
+  toolbarLeft.value = screenWidth;
+  toolbarTop.value = screenHeight;
+};
+
 onMounted(() => {
   hljs.highlightAll();
   // 加载保存的主题设置
   isDarkMode.value = localStorage.getItem('darkMode') === 'true';
   // 监听点击事件关闭下拉菜单
   document.addEventListener('click', handleClickOutside);
+
+  // 初始化位置
+  initToolbarPosition();
+
+  // 监听窗口大小变化，重新调整位置（可选）
+  window.addEventListener('resize', initToolbarPosition);
 });
 
+// 记得在组件卸载时移除事件监听
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('resize', initToolbarPosition); // 新增
 });
 </script>
 
 <style scoped>
-
-
-/* 应用容器 */
-.app-container {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  transition: background-color 0.3s, color 0.3s;
-  background-color: #f5f5f5;
-  color: #333333;
-  overflow-x: auto;
-}
-
-/* 暗黑模式 */
-.app-dark {
-  background-color: #1a1a1a;
-  color: #e0e0e0;
-}
-
-/* 头部样式 */
-.header {
-  border-bottom: 1px solid #ddd;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.3s;
-  background-color: #ffffff;
-  width: 100%;
-}
-
-.app-dark .header {
-  border-bottom-color: #444;
-  background-color: #2d2d2d;
-}
-
-.header-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.logo-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 25px;
-  height: 25px;
-  padding: 5px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  font-weight: bold;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-/* 主题切换按钮 */
-.theme-toggle {
-  position: relative;
-  width: 50px;
-  height: 26px;
-  border-radius: 13px;
-  background-color: #e0e0e0;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  overflow: hidden;
-}
-
-.app-dark .theme-toggle {
-  background-color: #444;
-}
-
-.toggle-thumb {
-  position: absolute;
-  left: 3px;
-  top: 3px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.34);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 2;
-}
-
-.toggle-thumb-dark {
-  transform: translateX(24px);
-}
-
-/* 模式切换按钮图标 */
-.sun-icon, .moon-icon {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  transition: opacity 0.3s;
-}
-
-.sun-icon {
-  left: 5px;
-  color: rgba(238, 156, 35, 0.89);
-}
-
-.moon-icon {
-  right: 5px;
-  color: #e7d17f;
-}
-
-/* 图标显示控制 */
-.theme-toggle .sun-icon {
-  opacity: 1;
-}
-
-.theme-toggle .moon-icon {
-  opacity: 0;
-}
-
-.app-dark .theme-toggle .sun-icon {
-  opacity: 0;
-}
-
-.app-dark .theme-toggle .moon-icon {
-  opacity: 1;
-}
-
-/* 下载按钮样式 */
-.download-btn-group {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.primary-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background-color: #679ef8;
-  color: white;
-  border: none;
-  border-radius: 8px 0 0 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-  height: 32px;
-}
-
-.primary-btn:hover {
-  background-color: #2855b3;
-}
-
-.dropdown-btn {
-  width: 32px;
-  height: 32px;
-  background-color: #4e8aee;
-  color: white;
-  border: none;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s;
-}
-
-.dropdown-btn:hover {
-  background-color: #2855b3;
-}
-
-.dropdown-menu {
-  position: relative;
-}
-
-.dropdown-options {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  width: 150px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  overflow: hidden;
-  transform-origin: top right;
-  transform: scale(0.95);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.2s, opacity 0.2s;
-  z-index: 10;
-}
-
-.app-dark .dropdown-options {
-  background-color: #2d2d2d;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.dropdown-show .dropdown-options {
-  transform: scale(1);
-  opacity: 1;
-  pointer-events: auto;
-}
-/* 下拉菜单选项 */
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 3px 7px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.dropdown-item:hover {
-  background-color: #f5f5f5;
-}
-
-.app-dark .dropdown-item:hover {
-  background-color: #3a3a3a;
-}
-/* 导出文件类型图标 */
-.file-icon {
-  width: 20px;
-}
-
-/* 主内容区 */
-.main-content {
-  flex: 1;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  display: flex;
-  gap: 20px;
-  height: calc(100vh - 300px);
-}
-
-/* 编辑器和预览容器 */
-.editor-container, .preview-container {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: background-color 0.3s;
-  overflow: hidden;
-}
-
-.app-dark .editor-container,
-.app-dark .preview-container {
-  background-color: #2d2d2d;
-}
-
-/* 面板头部 */
-.panel-header {
-  padding: 12px 15px;
-  border-bottom: 1px solid #eee;
-  font-weight: 500;
-  font-size: 20px;
-  display: flex;
-  height: 50px;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
-}
-/* 面板头部图标 */
-.panel-icon {
-  width: 24px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-/* 上传按钮 */
-.upload-btn {
-  border-radius: 8px;
-  border: 2px solid #aaaaaa;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* 上传按钮图标 */
-.upload-icon {
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  margin: 5px;
-}
-
-.upload-btn:hover {
-  background-color: #d9d9d9;
-}
-/* 编辑器文本区域 */
-.editor-textarea {
-  flex: 1;
-  width: 100%;
-  padding: 15px;
-  border: none;
-  resize: none;
-  outline: none;
-  font-family: 'Consolas', 'Monaco', monospace;
-  line-height: 1.6;
-  font-size: 14px;
-  background-color: transparent;
-  color: inherit;
-}
-
-/* 预览区域 */
-.preview-content {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  &::-webkit-scrollbar {
-    display: none; /* Chrome/Safari/Opera */
-  }
-  background-color: #fafafa;
-  transition: background-color 0.3s;
-}
-
-.app-dark .preview-content {
-  background-color: #2c2c2c;
-}
-
-/* 预览区域Markdown样式 */
-:deep(h1), :deep(h2), :deep(h3) {
-  margin: 1.5rem 0 1rem;
-  font-weight: 600;
-}
-
-:deep(h1) {
-  font-size: 1.8rem;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.3rem;
-}
-
-:deep(h2) {
-  font-size: 1.5rem;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.3rem;
-}
-
-.app-dark :deep(h1),
-.app-dark :deep(h2) {
-  border-color: #444;
-}
-
-:deep(h3) {
-  font-size: 1.25rem;
-}
-
-:deep(p) {
-  margin-bottom: 1rem;
-  line-height: 1.7;
-}
-
-:deep(ul), :deep(ol) {
-  margin-bottom: 1rem;
-  padding-left: 2rem;
-}
-
-:deep(ul) {
-  list-style-type: disc;
-}
-
-:deep(ol) {
-  list-style-type: decimal;
-}
-
-:deep(li) {
-  margin-bottom: 0.5rem;
-}
-
-:deep(blockquote) {
-  border-left: 4px solid #ddd;
-  padding-left: 1rem;
-  margin: 0 0 1rem 0;
-  color: #666;
-}
-
-.app-dark :deep(blockquote) {
-  border-color: #555;
-  color: #aaa;
-}
-
-:deep(pre) {
-  background-color: #ffffff;
-  padding: 1rem;
-  border-radius: 4px;
-  overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  &::-webkit-scrollbar {
-    display: none; /* Chrome/Safari/Opera */
-  }
-  margin-bottom: 1rem;
-}
-
-.app-dark :deep(pre) {
-  background-color: #333;
-}
-
-:deep(code) {
-  font-family: 'Consolas', 'Monaco', monospace;
-  font-size: 0.9rem;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-}
-
-.app-dark :deep(code) {
-  background-color: #333;
-}
-
-:deep(pre code) {
-  padding: 0;
-  background-color: transparent;
-}
-
-:deep(a) {
-  color: #1a73e8;
-  text-decoration: none;
-}
-
-.app-dark :deep(a) {
-  color: #8ab4f8;
-}
-
-:deep(a:hover) {
-  text-decoration: underline;
-}
-
-:deep(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 4px;
-  margin: 1rem 0;
-}
-
-/* 页脚样式 */
-.footer {
-  text-align: center;
-  font-size: 14px;
-  border-top: 1px solid #eee;
-  background-color: white;
-  transition: all 0.3s;
-}
-
-.app-dark .footer {
-  border-top-color: #444;
-  background-color: #2d2d2d;
-  color: #aaa;
-}
-
-/* 加载提示样式 */
-.loading-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.loading-mask:not([v-if="false"]) {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.loading-content {
-  text-align: center;
-  color: white;
-}
-/* 加载动画 */
-.spinner {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 12px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
-}
-
-.loading-text {
-  font-size: 14px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .main-content {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .editor-container, .preview-container {
-    width: 100%;
-    height: 50vh;
-  }
-}
-/* 弹窗样式 */
-.custom-toast {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100px);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  background-color: #f0f0f0;
-  color: #333;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  font-size: 14px;
-  z-index: 1000;
-  opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* 弹窗显示状态 */
-.toast-show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
-
-/* 成功状态 */
-.toast-success {
-  background-color: #e6f4ea;
-  border-left: 4px solid #36d399;
-}
-
-.toast-success .toast-icon {
-  color: #36d399;
-}
-
-/* 错误状态 */
-.toast-error {
-  background-color: #fee2e2;
-  border-left: 4px solid #f87272;
-}
-
-.toast-error .toast-icon {
-  color: #f87272;
-}
-
-/* 弹窗图标 */
-.toast-icon {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-/* 暗黑模式适配 */
-.app-dark .custom-toast {
-  background-color: #333;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.app-dark .toast-success {
-  background-color: #1e3a3a;
-  border-left-color: #36d399;
-}
-
-.app-dark .toast-error {
-  background-color: #3a1e1e;
-  border-left-color: #f87272;
-}
+@import '../styles/editor.css';
+@import '../styles/preview_global.css';
+@import '../styles/common.css';
+@import '../styles/header.css';
+@import '../styles/toast.css';
 </style>

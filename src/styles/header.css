@@ -1,0 +1,223 @@
+/* 头部样式 */
+.header {
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    background-color: #ffffff;
+    width: 100%;
+}
+
+.app-dark .header {
+    border-bottom-color: #444;
+    background-color: #2d2d2d;
+}
+
+.header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.logo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    font-weight: bold;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    border-radius: 13px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    overflow: hidden;
+}
+
+.app-dark .theme-toggle {
+    background-color: #444;
+}
+
+.toggle-thumb {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.34);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.toggle-thumb-dark {
+    transform: translateX(24px);
+}
+
+/* 模式切换按钮图标 */
+.sun-icon, .moon-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.3s;
+}
+
+.sun-icon {
+    left: 5px;
+    color: rgba(238, 156, 35, 0.89);
+}
+
+.moon-icon {
+    right: 5px;
+    color: #e7d17f;
+}
+
+/* 图标显示控制 */
+.theme-toggle .sun-icon {
+    opacity: 1;
+}
+
+.theme-toggle .moon-icon {
+    opacity: 0;
+}
+
+.app-dark .theme-toggle .sun-icon {
+    opacity: 0;
+}
+
+.app-dark .theme-toggle .moon-icon {
+    opacity: 1;
+}
+
+/* 下载按钮样式 */
+.download-btn-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.primary-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #679ef8;
+    color: white;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    height: 32px;
+}
+
+.primary-btn:hover {
+    background-color: #2855b3;
+}
+
+.dropdown-btn {
+    width: 32px;
+    height: 32px;
+    background-color: #4e8aee;
+    color: white;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.dropdown-btn:hover {
+    background-color: #2855b3;
+}
+
+.dropdown-menu {
+    position: relative;
+}
+
+.dropdown-options {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    width: 150px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    overflow: hidden;
+    transform-origin: top right;
+    transform: scale(0.95);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s, opacity 0.2s;
+    z-index: 10;
+}
+
+.app-dark .dropdown-options {
+    background-color: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.dropdown-show .dropdown-options {
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 下拉菜单选项 */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 7px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.app-dark .dropdown-item:hover {
+    background-color: #3a3a3a;
+}
+
+/* 导出文件类型图标 */
+.file-icon {
+    width: 20px;
+}

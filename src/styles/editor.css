@@ -1,0 +1,255 @@
+/* 编辑器和预览容器 */
+.editor-container, .preview-container {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.3s;
+    overflow: hidden;
+}
+
+
+.app-dark .editor-container,
+.app-dark .preview-container {
+    background-color: #2d2d2d;
+}
+
+/* 面板头部 */
+.panel-header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-weight: 500;
+    font-size: 20px;
+    display: flex;
+    height: 50px;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+/* 面板头部图标 */
+.panel-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 上传按钮 */
+.upload-btn {
+    border-radius: 8px;
+    border: 2px solid #aaaaaa;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 25px;
+    width: 25px;
+}
+
+/* 上传按钮图标 */
+.upload-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.upload-btn:hover {
+    background-color: #d9d9d9;
+}
+
+/* 编辑器文本区域 */
+.editor-textarea {
+    flex: 1;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    resize: none;
+    outline: none;
+    font-family: 'Consolas', 'Monaco', monospace;
+    line-height: 1.6;
+    font-size: 14px;
+    background-color: transparent;
+    color: inherit;
+}
+
+/* 顶部固定工具栏样式 */
+.text-toolbar {
+    position: absolute; /* 相对于编辑器容器定位 */
+    top: 50px; /* 初始位置：在标题下方 */
+    left: 20px;
+    z-index: 100; /* 确保在编辑器上方 */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px;
+    display: flex;
+    gap: 6px;
+    cursor: move; /* 鼠标悬停时显示拖动图标 */
+}
+
+.app-dark .text-toolbar {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+.toolbar-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 2px;
+    background-color: transparent;
+    cursor: pointer; /* 按钮恢复点击光标 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.toolbar-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.app-dark .toolbar-btn:hover {
+    background-color: #444;
+}
+
+/* 拖拽手柄样式（可选） */
+.drag-handle {
+    margin-left: 8px;
+    padding: 0 4px;
+    color: #999;
+    font-size: 12px;
+}
+
+/* 表格弹窗样式 */
+.table-modal-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.table-modal {
+    width: 260px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.app-dark .table-modal {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.modal-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-dark .modal-header {
+    border-bottom-color: #444;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.app-dark .modal-close:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label {
+    width: 60px;
+    text-align: right;
+}
+
+.number-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.app-dark .number-input {
+    border-color: #555;
+    background-color: #333;
+    color: #fff;
+}
+
+.modal-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.app-dark .modal-footer {
+    border-top-color: #444;
+}
+
+.cancel-btn, .confirm-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.cancel-btn {
+    background-color: #f5f5f5;
+}
+
+.app-dark .cancel-btn {
+    background-color: #444;
+    border-color: #555;
+    color: #fff;
+}
+.cancel-btn:hover {
+    background-color: #c4c4c4;
+}
+.app-dark .cancel-btn:hover {
+    background-color: #7e7e7e;
+}
+.confirm-btn {
+    background-color: #4e8aee;
+    color: white;
+    border-color: #3a6fdc;
+}
+
+.confirm-btn:hover {
+    background-color: #2855b3;
+}
