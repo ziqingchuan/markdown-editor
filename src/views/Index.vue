@@ -102,6 +102,7 @@
             placeholder="在此输入内容..."
             ref="editorRef"
             @scroll="handleEditorScroll"
+            @keydown="handleKeyDown"
         ></textarea>
       </div>
 
@@ -187,14 +188,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { marked } from 'marked';
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
+import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/rainbow.css';
-import { watch, nextTick } from 'vue';
 import compressImage from "../utils/compressor.ts";
 import {FileHandler} from "../utils/fileHandler.ts";
 import {syncScroll} from "../utils/handleScroll.ts";
@@ -585,7 +585,10 @@ const downloadPdf = () => {
       border-radius: 0 6px 6px 0;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-
+    img {
+      max-width: 100%;
+      height: auto;
+    }
     a {
       color: #1a73e8;
       text-decoration: none;
@@ -691,6 +694,43 @@ const stopDrag = () => {
     document.removeEventListener('mouseup', stopDrag);
   }
 };
+
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const editor = editorRef.value;
+    if (!editor) return;
+
+    // 保存当前滚动位置
+    const scrollTop = editor.scrollTop;
+
+    // 获取光标位置
+    const startPos = editor.selectionStart;
+    const endPos = editor.selectionEnd;
+
+    // 保存原始内容引用
+    const originalContent = markdownContent.value;
+
+    // 计算新内容
+    markdownContent.value = originalContent.substring(0, startPos) +
+        '    ' +  // 插入4个空格
+        originalContent.substring(endPos);
+
+    // 使用$nextTick确保DOM更新后再设置光标
+    nextTick(() => {
+      if (editor) {
+        // 设置新光标位置（原位置 + 4个空格）
+        const newCursorPos = startPos + 4;
+        editor.selectionStart = newCursorPos;
+        editor.selectionEnd = newCursorPos;
+
+        // 恢复滚动位置
+        editor.scrollTop = scrollTop;
+      }
+    });
+  }
+};
+
 
 // 计算工具栏初始位置（屏幕右下角）
 const initToolbarPosition = () => {
