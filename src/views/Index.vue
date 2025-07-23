@@ -312,7 +312,16 @@ const formatText = (type: 'bold' | 'italic' | 'underline' | 'link' | 'code' | 'q
 };
 
 const addCodeBlock = () => {
-  markdownContent.value += `\n\`\`\`javascript\n\n\`\`\``;
+  if (!editorRef.value) return;
+  // 插入代码块到编辑器（光标位置）
+  const editor = editorRef.value;
+  const startPos = editor.selectionStart;
+  const endPos = editor.selectionEnd;
+  // 保留光标前后内容，插入表格
+  markdownContent.value =
+      markdownContent.value.substring(0, startPos) +
+      `\n\`\`\`javascript\n\n\`\`\`` +
+      markdownContent.value.substring(endPos);
 }
 
 // 打开表格弹窗
