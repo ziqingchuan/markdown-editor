@@ -82,13 +82,14 @@
     top: 50px; /* 初始位置：在标题下方 */
     left: 20px;
     z-index: 100; /* 确保在编辑器上方 */
-    background-color: #fff;
+    background: #fff url("../assets/drag.svg") no-repeat right 8px center;
+    background-size: inherit;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 4px;
     display: flex;
     gap: 6px;
     cursor: move; /* 鼠标悬停时显示拖动图标 */
+    padding: 4px 40px 4px 4px;
 }
 
 .app-dark .text-toolbar {

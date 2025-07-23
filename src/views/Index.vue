@@ -696,7 +696,7 @@ const stopDrag = () => {
 const initToolbarPosition = () => {
 
   // 否则计算屏幕右下角位置
-  const toolbarWidth = 280;
+  const toolbarWidth = 310;
   const toolbarHeight = 140;
   const margin = 0; // 距离屏幕边缘的间距
 
