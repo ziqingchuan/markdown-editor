@@ -13,6 +13,8 @@
   "dependencies": {
     "dompurify": "^3.2.6",
     "gh-pages": "^6.3.0",
+    "mammoth": "^1.9.0",
+    "pdfjs-dist": "^5.1.91",
     "highlight.js": "^11.11.1",
     "html2pdf.js": "^0.10.3",
     "marked": "^16.1.1",

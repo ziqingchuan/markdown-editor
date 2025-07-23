@@ -5,6 +5,9 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   base: '/markdown-editor/',
+  optimizeDeps: {
+    include: ['mammoth', 'pdfjs-dist'],
+  },
   build: {
     // 分割代码
     rollupOptions: {
@@ -15,7 +18,9 @@ export default defineConfig({
           highlight: ['highlight.js'],
           marked: ['marked'],
           dompurify: ['dompurify'],
-          compressorjs: ['compressorjs']
+          compressorjs: ['compressorjs'],
+          mammoth: ['mammoth'],
+          pdfjsDist: ['pdfjs-dist']
         }
       }
     },

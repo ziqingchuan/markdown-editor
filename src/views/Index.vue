@@ -3,12 +3,12 @@
     <!-- 顶部导航栏 -->
     <header class="header">
       <div class="header-content">
-        <h1 class="logo">
+        <div class="logo">
           <i class="logo-icon">
             <img src="/logo.svg" alt="logo">
           </i>
           <span>素笔 Mark</span>
-        </h1>
+        </div>
 
         <div class="header-actions">
           <!-- 主题切换按钮 -->
@@ -27,6 +27,7 @@
               <button class="dropdown-btn" @click.stop="showDropdown = !showDropdown">
                 ▼
               </button>
+              <!-- 下载选项 -->
               <div class="dropdown-options">
                 <div class="dropdown-item" @click="downloadMarkdown">
                   <img class="file-icon" src="/markdown.svg" alt="md">
@@ -47,23 +48,30 @@
     <main class="main-content">
       <!-- 编辑器区域 -->
       <div class="editor-container">
+
         <div class="panel-header editor-header">
-          <span class="panel-icon">📝</span>
+          <img class="panel-icon" src="/editor.svg" alt="编辑">
           <span>编辑区域</span>
-          <div class="upload-picture" @click="openFileDialog" title="上传图片">
+
+          <!-- 功能按钮组 -->
+          <div class="upload-btn" @click="openImageDialog" title="上传图片" style="margin-left: auto">
             <img class="upload-icon" src="/upload-picture.svg" alt="上传图片">
           </div>
+          <div class="upload-btn" @click="openFileDialog" title="解析文件">
+            <img class="upload-icon" src="/upload-file.svg" alt="解析文件">
+          </div>
         </div>
+
         <textarea
             v-model="markdownContent"
             class="editor-textarea"
-            placeholder="在此输入Markdown内容..."></textarea>
+            placeholder="在此输入内容..."></textarea>
       </div>
 
       <!-- 预览区域 -->
       <div class="preview-container">
         <div class="panel-header preview-header">
-          <span class="panel-icon">👀</span>
+          <img class="panel-icon" src="/preview.svg" alt="预览">
           <span>预览区域</span>
         </div>
         <div class="preview-content" v-html="renderedMarkdown"></div>
@@ -107,11 +115,12 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
-// 引入highlight.js核心库和样式
 import hljs from 'highlight.js';
 import 'highlight.js/styles/rainbow.css';
 import { watch, nextTick } from 'vue';
 import compressImage from "../utils/compressor.ts";
+import {FileHandler} from "../utils/fileHandler.ts";
+
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
   // @ts-ignore
@@ -129,51 +138,30 @@ const markdownContent = ref(`# 欢迎来到素笔 Mark !
 - 明暗模式切换
 - 下载为Markdown文件
 - 下载为PDF文件
+- 图片本地上传
+- 文件内容识别
+- 代码高亮
 
-## 二级标题
-
-### 三级标题
-
-**加粗文本**
-
-*斜体文本*
-
-***加粗斜体文本***
-
-> 这是一段引用文本
-
-- 列表项1
-- 列表项2
-- 列表项3
-
-1. 有序列表1
-2. 有序列表2
-3. 有序列表3
-
-[链接文本](https://example.com)
-
-![示例图片](https://picsum.photos/800/400?random=1)
+[欢迎来我的博客看看](https://try-catch.life/)
 
 \`\`\`javascript
-// 代码块示例
 function greet() {
   console.log("Hello, World!");
 }
 \`\`\`
 `);
 
-// 渲染后的HTML（包含高亮处理）
+// 渲染后的HTML
 const renderedMarkdown = computed(() => {
   // @ts-ignore
   return DOMPurify.sanitize(marked.parse(markdownContent.value));
 });
 
-// 状态管理（新增弹窗相关状态）
-const isDarkMode = ref(false);
+// 状态管理
+const isDarkMode = ref(true); // 暗黑模式
 const isLoading = ref(false);
 const showDropdown = ref(false);
-// 弹窗状态
-const showToast = ref(false);
+const showToast = ref(false);// 弹窗状态
 const toastMessage = ref('');
 const toastType = ref('success'); // success/error
 
@@ -188,16 +176,26 @@ const showCustomToast = (message: any, type = 'success') => {
   }, 3000);
 };
 
-const openFileDialog = () => {
+// 打开图片选择
+const openImageDialog = () => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
+  input.onchange = handleImageSelect;
+  input.click();
+};
+
+// 打开文件选择
+const openFileDialog = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.html,.md,.pdf,.txt,.doc,.docx';
   input.onchange = handleFileSelect;
   input.click();
 };
 
-// 处理文件选择（包含压缩逻辑）
-const handleFileSelect = async (e: Event) => {
+// 处理图片选择
+const handleImageSelect = async (e: Event) => {
   const target = e.target as HTMLInputElement;
   const file = target.files?.[0];
 
@@ -240,6 +238,31 @@ const handleFileSelect = async (e: Event) => {
   }
 };
 
+// 处理文件选择
+const handleFileSelect = async (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  try {
+    // 显示加载状态
+    isLoading.value = true;
+    const content = await FileHandler.handleFile(file);
+    showCustomToast('文件内容解析完成！', 'success');
+    markdownContent.value += content;
+
+  } catch (error) {
+    console.error('文件内容读取失败:', error);
+    showCustomToast('文件内容读取失败，请重试', 'error');
+  } finally {
+    // 关闭加载状态
+    isLoading.value = false;
+    // 清空input值，允许重复选择同一文件
+    target.value = '';
+  }
+};
+
 
 // 点击空白处关闭下拉菜单
 const handleClickOutside = (e: any) => {
@@ -249,13 +272,13 @@ const handleClickOutside = (e: any) => {
   }
 };
 
-// 切换暗黑模式（同步更新代码高亮主题）
+// 切换暗黑模式
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value;
   localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false');
 };
 
-// 下载Markdown文件（替换弹窗）
+// 下载Markdown文件
 const downloadMarkdown = () => {
   showDropdown.value = false;
   try {
@@ -274,7 +297,7 @@ const downloadMarkdown = () => {
   }
 };
 
-// 下载PDF文件（替换弹窗）
+// 下载PDF文件
 const downloadPdf = () => {
   showDropdown.value = false;
   isLoading.value = true;
@@ -288,8 +311,10 @@ const downloadPdf = () => {
   tempElement.style.maxWidth = '800px';
   tempElement.style.margin = '0 auto';
   tempElement.style.padding = '40px';
-  tempElement.style.backgroundColor = isDarkMode.value ? '#1a1a1a' : '#ffffff';
-  tempElement.style.color = isDarkMode.value ? '#e0e0e0' : '#333333';
+  // tempElement.style.backgroundColor = isDarkMode.value ? '#1a1a1a' : '#ffffff'; // 调整pdf的背景色
+  tempElement.style.backgroundColor = '#ffffff'
+  // tempElement.style.color = isDarkMode.value ? '#e0e0e0' : '#333333'; // 调整pdf的字体色
+  tempElement.style.color = '#333333'
   document.body.appendChild(tempElement);
 
   const opt = {
@@ -308,6 +333,8 @@ const downloadPdf = () => {
         isLoading.value = false;
       });
 };
+
+// 监听代码块的高亮
 watch(markdownContent, () => {
   nextTick(() => {
     // 只高亮预览区域内的代码块
@@ -320,7 +347,6 @@ watch(markdownContent, () => {
   });
 });
 
-// 生命周期
 onMounted(() => {
   hljs.highlightAll();
   // 加载保存的主题设置
@@ -335,18 +361,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* 基础样式重置 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-  &::-webkit-scrollbar {
-    display: none; /* Chrome/Safari/Opera */
-  }
-}
+
 
 /* 应用容器 */
 .app-container {
@@ -392,7 +407,7 @@ onBeforeUnmount(() => {
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 1.2rem;
   font-weight: bold;
 }
@@ -401,8 +416,8 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   padding: 5px;
   border-radius: 50%;
   background-color: #ffffff;
@@ -415,7 +430,7 @@ onBeforeUnmount(() => {
   gap: 20px;
 }
 
-/* 主题切换按钮 - 修复图标显示问题 */
+/* 主题切换按钮 */
 .theme-toggle {
   position: relative;
   width: 50px;
@@ -448,7 +463,7 @@ onBeforeUnmount(() => {
   transform: translateX(24px);
 }
 
-/* 使用Unicode字符作为图标，确保显示 */
+/* 模式切换按钮图标 */
 .sun-icon, .moon-icon {
   position: absolute;
   top: 50%;
@@ -542,7 +557,7 @@ onBeforeUnmount(() => {
   top: 100%;
   right: 0;
   margin-top: 4px;
-  width: 160px;
+  width: 150px;
   background-color: white;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -565,7 +580,7 @@ onBeforeUnmount(() => {
   opacity: 1;
   pointer-events: auto;
 }
-
+/* 下拉菜单选项 */
 .dropdown-item {
   display: flex;
   align-items: center;
@@ -582,7 +597,7 @@ onBeforeUnmount(() => {
 .app-dark .dropdown-item:hover {
   background-color: #3a3a3a;
 }
-
+/* 导出文件类型图标 */
 .file-icon {
   width: 20px;
 }
@@ -593,7 +608,8 @@ onBeforeUnmount(() => {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
   display: flex;
   gap: 20px;
   height: calc(100vh - 300px);
@@ -628,26 +644,34 @@ onBeforeUnmount(() => {
   gap: 8px;
   transition: all 0.3s;
 }
-
-.upload-picture {
+/* 面板头部图标 */
+.panel-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 上传按钮 */
+.upload-btn {
   border-radius: 8px;
-  border: none;
+  border: 2px solid #aaaaaa;
   cursor: pointer;
   transition: background-color 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
+/* 上传按钮图标 */
 .upload-icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   padding: 0;
-  margin: 8px;
+  margin: 5px;
 }
 
-.upload-picture:hover {
-  background-color: #d2d2d2;
+.upload-btn:hover {
+  background-color: #d9d9d9;
 }
 /* 编辑器文本区域 */
 .editor-textarea {
@@ -837,7 +861,7 @@ onBeforeUnmount(() => {
   text-align: center;
   color: white;
 }
-
+/* 加载动画 */
 .spinner {
   width: 40px;
   height: 40px;
@@ -868,6 +892,7 @@ onBeforeUnmount(() => {
     height: 50vh;
   }
 }
+/* 弹窗样式 */
 .custom-toast {
   position: fixed;
   top: 20px;
