@@ -771,8 +771,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import '../styles/editor.css';
-@import '../styles/preview_global.css';
+@import '../styles/edit_area.css';
+@import '../styles/preview_area.css';
 @import '../styles/common.css';
 @import '../styles/header.css';
 @import '../styles/toast.css';
