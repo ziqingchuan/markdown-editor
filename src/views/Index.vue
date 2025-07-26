@@ -12,7 +12,7 @@
 
         <div class="header-actions">
           <!-- 主题切换按钮 -->
-          <div class="theme-toggle" @click="toggleDarkMode">
+          <div class="theme-toggle" @click="isDarkMode = !isDarkMode">
             <div class="toggle-thumb" :class="{ 'toggle-thumb-dark': isDarkMode }"></div>
             <span class="sun-icon">☀</span>
             <span class="moon-icon">☪</span>
@@ -194,11 +194,15 @@ import DOMPurify from 'dompurify';
 import html2pdf from 'html2pdf.js';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/rainbow.css';
-import compressImage from "../utils/compressor.ts";
-import {FileHandler} from "../utils/fileHandler.ts";
-import {syncScroll} from "../utils/handleScroll.ts";
+import compressImage from "../utils/imageCompressor.ts";
+import {FileUploadHandler} from "../utils/fileUploadHandler.ts";
+import {syncScroll} from "../utils/scrollHandler.ts";
 import {initialMarkdownContent} from "../consts/markdownContent.ts";
 import {pdfConfig, pdfOptions} from "../consts/pdfConfig.ts";
+import {generateMarkdownTable} from "../utils/tableGenerator.ts";
+import type {ContentType} from "../types/contentType.ts";
+import {textHandler} from "../utils/textHandler.ts";
+
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
   // @ts-ignore
@@ -230,7 +234,6 @@ const previewRef = ref<HTMLDivElement>();
 const isSyncing = ref(false);
 // 工具栏相关状态
 const toolbarRef = ref<HTMLDivElement>();
-const isToolbarVisible = ref(false); // 工具栏是否显示
 const toolbarLeft = ref(0); // 工具栏左侧定位
 const toolbarTop = ref(0); // 工具栏顶部定位
 const isDragging = ref(false); // 是否正在拖拽
@@ -242,67 +245,22 @@ const tableRows = ref(3); // 默认3行
 const tableCols = ref(3); // 默认3列
 
 // 格式化选中文本（根据按钮类型添加对应的Markdown格式）
-const formatText = (type: 'bold' | 'italic' | 'underline' | 'link' | 'code' | 'quote' | 'list') => {
+const formatText = (type: ContentType) => {
   if (!editorRef.value) return;
-
-  const editor = editorRef.value;
-  const selection = window.getSelection();
-  if (!selection) {
-    isToolbarVisible.value = false;
-    return;
-  }
-
   // 获取选中的文本和位置
-  const selectedText = selection.toString();
-  const startPos = editor.selectionStart;
-  const endPos = editor.selectionEnd;
+  const selectedText = window.getSelection()?.toString() || '';
 
   // 根据类型添加对应的Markdown格式
-  let formattedText = '';
-  switch (type) {
-    case 'bold':
-      formattedText = `**${selectedText}**`;
-      break;
-    case 'italic':
-      formattedText = `*${selectedText}*`;
-      break;
-    case 'underline':
-      formattedText = `<u>${selectedText}</u>`; // Markdown原生不支持下划线，用HTML标签
-      break;
-    case 'link':
-      const linkText = selectedText || '链接文本';
-      formattedText = `[${linkText}](https://example.com)`; // 默认链接地址，可改为prompt输入
-      break;
-    case 'code':
-      formattedText = `\`${selectedText}\``; // 行内代码
-      break;
-    case 'quote':
-      formattedText = `> ${selectedText}`;
-      break;
-    case 'list':
-      formattedText = `- ${selectedText}`
-      break;
-  }
+  let formattedText = textHandler(type, selectedText);
 
-  // 更新编辑器内容
-  markdownContent.value =
-      markdownContent.value.substring(0, startPos) +
-      formattedText +
-      markdownContent.value.substring(endPos);
+  addContentToEditor(formattedText);
 };
 
+
+// 添加代码块
 const addCodeBlock = () => {
-  if (!editorRef.value) return;
-  // 插入代码块到编辑器（光标位置）
-  const editor = editorRef.value;
-  const startPos = editor.selectionStart;
-  const endPos = editor.selectionEnd;
-  // 保留光标前后内容，插入表格
-  markdownContent.value =
-      markdownContent.value.substring(0, startPos) +
-      `\n\`\`\`javascript\n\n\`\`\`` +
-      markdownContent.value.substring(endPos);
-}
+  addContentToEditor(`\n\`\`\`javascript\n\n\`\`\``);
+};
 
 // 打开表格弹窗
 const addTable = () => {
@@ -318,9 +276,14 @@ const confirmTable = () => {
 
   // 校验输入（至少1行1列）
   if (tableRows.value < 1 || tableCols.value < 1) {
-    showCustomToast('行数和列数必须大于0', 'error');
+    showCustomToast('行数和列数不能小于1哦', 'error');
     return;
   }
+  if (tableRows.value > 14 || tableCols.value > 14) {
+    showCustomToast('行数(列数)太多啦，请控制在14以内', 'error');
+    return;
+  }
+
 
   // 生成Markdown表格
   const tableContent = generateMarkdownTable(
@@ -328,35 +291,13 @@ const confirmTable = () => {
       tableCols.value
   );
 
-  // 插入表格到编辑器（光标位置）
-  const editor = editorRef.value;
-  const startPos = editor.selectionStart;
-  const endPos = editor.selectionEnd;
-  // 保留光标前后内容，插入表格
-  markdownContent.value =
-      markdownContent.value.substring(0, startPos) +
-      tableContent +
-      markdownContent.value.substring(endPos);
+  addContentToEditor(tableContent);
 
   // 关闭弹窗并提示
   showTableModal.value = false;
   showCustomToast(`已插入 ${tableRows.value}行×${tableCols.value}列 表格`);
 };
 
-// 生成Markdown表格内容
-const generateMarkdownTable = (rows: number, cols: number) => {
-  // 表头行（如：| 列1 | 列2 | 列3 |）
-  const header = `| ${Array(cols).fill('列').map((_, i) => `列${i+1}`).join(' | ')} |`;
-  // 分隔行（如：| --- | --- | --- |）
-  const separator = `| ${Array(cols).fill('---').join(' | ')} |`;
-  // 内容行（如：| 内容 | 内容 | 内容 |）
-  const contentRows = Array(rows - 1) // 减去表头行
-      .fill('')
-      .map(() => `| ${Array(cols).fill('内容').join(' | ')} |`);
-
-  // 组合成完整表格（表头+分隔+内容行，每行换行）
-  return `\n${header}\n${separator}\n${contentRows.join('\n')}\n`;
-};
 
 // 显示自定义弹窗
 const showCustomToast = (message: any, type = 'success') => {
@@ -441,7 +382,7 @@ const handleFileSelect = async (e: Event) => {
   try {
     // 显示加载状态
     isLoading.value = true;
-    const content = await FileHandler.handleFile(file);
+    const content = await FileUploadHandler.handleFile(file);
     showCustomToast('文件内容解析完成！', 'success');
     markdownContent.value += content;
 
@@ -456,19 +397,12 @@ const handleFileSelect = async (e: Event) => {
   }
 };
 
-
 // 点击空白处关闭下拉菜单
 const handleClickOutside = (e: any) => {
   const dropdown = document.querySelector('.dropdown-menu');
   if (dropdown && !dropdown.contains(e.target)) {
     showDropdown.value = false;
   }
-};
-
-// 切换暗黑模式
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value;
-  localStorage.setItem('darkMode', isDarkMode.value ? 'true' : 'false');
 };
 
 // 下载Markdown文件
@@ -537,19 +471,6 @@ const handlePreviewScroll = () => {
   syncScroll(previewRef, editorRef, isSyncing);
 };
 
-// 监听代码块的高亮
-watch(markdownContent, () => {
-  nextTick(() => {
-    // 只高亮预览区域内的代码块
-    const previewContainer = document.querySelector('.preview-content');
-    if (previewContainer) {
-      previewContainer.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightElement(<HTMLElement>block);
-      });
-    }
-  });
-});
-
 // 开始拖拽（鼠标按下时）
 const startDrag = (e: MouseEvent) => {
   // 为 event.target 指定类型为 HTMLElement
@@ -603,6 +524,7 @@ const stopDrag = () => {
   }
 };
 
+// 解决Tab按键冲突
 const handleKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Tab') {
     e.preventDefault();
@@ -639,7 +561,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 };
 
-
+//  初始化工具栏位置
 const initToolbarPosition = () => {
   if (!toolbarRef.value) return;
 
@@ -657,24 +579,50 @@ const initToolbarPosition = () => {
   toolbarTop.value = Math.max(marginTop, maxTop);
 };
 
+
+// 工具类：插入内容到光标处
+const addContentToEditor = (content: string) => {
+  if (!editorRef.value) return;
+  // 插入表格到编辑器（光标位置）
+  const editor = editorRef.value;
+  const startPos = editor.selectionStart;
+  const endPos = editor.selectionEnd;
+
+  markdownContent.value =
+      markdownContent.value.substring(0, startPos) +
+      content+
+      markdownContent.value.substring(endPos);
+}
+
+// 监听代码块的高亮
+watch(markdownContent, () => {
+  nextTick(() => {
+    // 只高亮预览区域内的代码块
+    const previewContainer = document.querySelector('.preview-content');
+    if (previewContainer) {
+      previewContainer.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(<HTMLElement>block);
+      });
+    }
+  });
+});
+
 onMounted(() => {
   hljs.highlightAll();
-  // 加载保存的主题设置
-  isDarkMode.value = localStorage.getItem('darkMode') === 'true';
   // 监听点击事件关闭下拉菜单
   document.addEventListener('click', handleClickOutside);
 
   // 初始化位置
   initToolbarPosition();
 
-  // 监听窗口大小变化，重新调整位置（可选）
+  // 监听窗口大小变化，重新调整位置
   window.addEventListener('resize', initToolbarPosition);
 });
 
 // 记得在组件卸载时移除事件监听
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
-  window.removeEventListener('resize', initToolbarPosition); // 新增
+  window.removeEventListener('resize', initToolbarPosition);
 });
 </script>
 

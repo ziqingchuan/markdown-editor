@@ -59,7 +59,7 @@
     color: #333;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-size: 14px;
-    z-index: 1000;
+    z-index: 3000;
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
@@ -78,4 +78,14 @@
 
 .toast-success .toast-icon {
     color: #36d399;
+}
+
+/* 成功状态 */
+.toast-error {
+    background-color: #f4e6e6;
+    border-left: 4px solid #d33636;
+}
+
+.toast-error .toast-icon {
+    color: #d33636;
 }
