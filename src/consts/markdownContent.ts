@@ -1,0 +1,22 @@
+export const initialMarkdownContent = `# 欢迎来到素笔 Mark !
+
+> 这是一个基于Vue3的简易Markdown编辑器，提供如下功能：
+
+- 实时预览
+- 明暗模式切换
+- 同步跟随滚动
+- 导出md/pdf文件
+- 图片本地上传
+- 文件内容解析读取
+- 代码高亮
+- 快捷工具栏
+- 后续持续更新...
+
+[欢迎来我的博客看看：try-catch.life](https://try-catch.life/)
+
+\`\`\`javascript
+function greet() {
+  console.log("Hello, World!");
+}
+\`\`\`
+`;

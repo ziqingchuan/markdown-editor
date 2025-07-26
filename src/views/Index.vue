@@ -122,7 +122,6 @@
 
     <!-- 页脚 -->
     <footer class="footer">
-      <p>使用 Vue3 构建的简易 Markdown 编辑器</p>
       <p>© 2025    <a target="_blank" href="https://try-catch.life/">try-catch.life</a></p>
     </footer>
 
@@ -198,6 +197,8 @@ import 'highlight.js/styles/rainbow.css';
 import compressImage from "../utils/compressor.ts";
 import {FileHandler} from "../utils/fileHandler.ts";
 import {syncScroll} from "../utils/handleScroll.ts";
+import {initialMarkdownContent} from "../consts/markdownContent.ts";
+import {pdfConfig, pdfOptions} from "../consts/pdfConfig.ts";
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
   // @ts-ignore
@@ -207,28 +208,7 @@ marked.setOptions({
   },
 });
 // 初始化Markdown内容
-const markdownContent = ref(`# 欢迎来到素笔 Mark !
-
-> 这是一个基于Vue3的简易Markdown编辑器，提供如下功能：
-
-- 实时预览
-- 明暗模式切换
-- 同步跟随滚动
-- 导出md/pdf文件
-- 图片本地上传
-- 文件内容解析读取
-- 代码高亮
-- 快捷工具栏
-- 后续持续更新...
-
-[欢迎来我的博客看看：try-catch.life](https://try-catch.life/)
-
-\`\`\`javascript
-function greet() {
-  console.log("Hello, World!");
-}
-\`\`\`
-`);
+const markdownContent = ref(initialMarkdownContent);
 
 // 渲染后的HTML
 const renderedMarkdown = computed(() => {
@@ -521,85 +501,7 @@ const downloadPdf = () => {
 
   // 2. 手动注入所需样式（关键步骤）
   const style = document.createElement('style');
-  style.textContent = `
-    /* 表格样式 */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1.5rem 0;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    th {
-      background-color: #f8f9fa;
-      color: #333;
-      font-weight: 600;
-      padding: 0.75rem 1rem;
-      text-align: left;
-      border: 1px solid #e9ecef;
-    }
-    td {
-      padding: 0.75rem 1rem;
-      border: 1px solid #e9ecef;
-      line-height: 1.5;
-    }
-    tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-
-    /* 行内代码样式 */
-    code {
-      background-color: #f1f3f5;
-      color: #3a7bde;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 0.8rem;
-      padding: 0.2rem 0.4rem;
-      border-radius: 5px;
-    }
-
-    /* 代码块样式 */
-    pre {
-      background-color: #transparent;
-      padding: 1rem;
-      border-radius: 6px;
-      overflow-x: auto;
-      margin: 1rem 0;
-    }
-    pre code {
-      background-color: transparent;
-      color: #333;
-      padding: 0;
-      font-size: 0.9em;
-      line-height: 1.5;
-    }
-
-    blockquote {
-      border-left: 4px solid #0d6ae3;
-      border-top: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-      border-bottom: 1px solid #ddd;
-      background-color: #f5f5f5;
-      padding: 1rem;
-      margin: 0 0 1rem 0;
-      color: #666;
-      border-radius: 0 6px 6px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    a {
-      color: #1a73e8;
-      text-decoration: none;
-    }
-    /* 基础样式 */
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      line-height: 1.6;
-      color: #333;
-    }
-  `;
+  style.textContent = pdfConfig;
   tempElement.appendChild(style);
 
   // 3. 代码高亮（保持现有逻辑）
@@ -616,17 +518,8 @@ const downloadPdf = () => {
 
   document.body.appendChild(tempElement);
 
-  // 5. PDF配置（保持现有逻辑）
-  const opt = {
-    margin: 10,
-    filename: '素笔Mark导出文档.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  // 6. 生成并下载PDF
-  html2pdf().from(tempElement).set(opt).save()
+  // 5. 生成并下载PDF
+  html2pdf().from(tempElement).set(pdfOptions).save()
       .then(() => showCustomToast('PDF文件下载成功'))
       .catch((error: any) => showCustomToast('PDF生成失败：' + error.message, 'error'))
       .finally(() => {
@@ -675,11 +568,26 @@ const startDrag = (e: MouseEvent) => {
 };
 // 拖拽中（鼠标移动时）
 const handleDrag = (e: MouseEvent) => {
-  if (!isDragging.value || !editorRef.value) return;
+  if (!isDragging.value || !toolbarRef.value) return;
 
-  // 计算新位置（相对于编辑器容器）
+  // 获取工具栏自身尺寸
+  const toolbarWidth = toolbarRef.value.offsetWidth;
+  const toolbarHeight = toolbarRef.value.offsetHeight;
+
+  // 获取屏幕可视区域尺寸（减去滚动条宽度，避免超出）
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  // 计算新位置（基于鼠标移动）
   let newLeft = e.clientX - startX.value;
   let newTop = e.clientY - startY.value;
+
+  // 边界限制：左侧不小于0，右侧不超过屏幕宽度 - 工具栏宽度
+  newLeft = Math.max(0, Math.min(newLeft, screenWidth - toolbarWidth));
+
+  // 边界限制：顶部不小于0，底部不超过屏幕高度 - 工具栏高度
+  newTop = Math.max(0, Math.min(newTop, screenHeight - toolbarHeight - 10));
+
   // 更新工具栏位置
   toolbarLeft.value = newLeft;
   toolbarTop.value = newTop;
@@ -732,21 +640,21 @@ const handleKeyDown = (e: KeyboardEvent) => {
 };
 
 
-// 计算工具栏初始位置（屏幕右下角）
 const initToolbarPosition = () => {
+  if (!toolbarRef.value) return;
 
-  // 否则计算屏幕右下角位置
-  const toolbarWidth = 310;
-  const toolbarHeight = 140;
-  const margin = 0; // 距离屏幕边缘的间距
+  const toolbarWidth = toolbarRef.value.offsetWidth;
+  const toolbarHeight = toolbarRef.value.offsetHeight;
+  const marginLeft = 10; // 距离屏幕边缘的间距（可选，增加留白）
+  const marginTop = 60;
 
-  // 屏幕可用宽度和高度（减去滚动条和边缘间距）
-  const screenWidth = window.innerWidth - margin - toolbarWidth;
-  const screenHeight = window.innerHeight - margin - toolbarHeight;
+  // 屏幕可用宽度和高度（减去工具栏尺寸和边缘间距）
+  const maxLeft = window.innerWidth - marginLeft - toolbarWidth;
+  const maxTop = window.innerHeight - marginTop - toolbarHeight;
 
-  // 设置初始位置为右下角
-  toolbarLeft.value = screenWidth;
-  toolbarTop.value = screenHeight;
+  // 确保初始位置在屏幕内（取计算值和0的最大值，避免负数）
+  toolbarLeft.value = Math.max(marginLeft, maxLeft);
+  toolbarTop.value = Math.max(marginTop, maxTop);
 };
 
 onMounted(() => {
