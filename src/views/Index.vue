@@ -43,35 +43,6 @@
         </div>
       </div>
     </header>
-    <!-- 富文本操作工具栏 -->
-    <div
-        class="text-toolbar"
-        ref="toolbarRef"
-        :style="{ left: toolbarLeft + 'px', top: toolbarTop + 'px' }"
-        @mousedown="startDrag"
-    >
-      <button class="toolbar-btn" @click="formatText('bold')" title="加粗">
-        <img src="../assets/bold.svg" alt="加粗">
-      </button>
-      <button class="toolbar-btn" @click="formatText('italic')" title="斜体">
-        <img src="../assets/italic.svg" alt="斜体">
-      </button>
-      <button class="toolbar-btn" @click="formatText('underline')" title="下划线">
-        <img src="../assets/underline.svg" alt="下划线">
-      </button>
-      <button class="toolbar-btn" @click="formatText('link')" title="链接">
-        <img src="../assets/link.svg" alt="链接">
-      </button>
-      <button class="toolbar-btn" @click="formatText('code')" title="代码">
-        <img src="../assets/code.svg" alt="代码">
-      </button>
-      <button class="toolbar-btn" @click="formatText('quote')" title="引用">
-        <img src="../assets/quote.svg" alt="引用">
-      </button>
-      <button class="toolbar-btn" @click="formatText('list')" title="列表">
-        <img src="../assets/list.svg" alt="列表">
-      </button>
-    </div>
     <!-- 主内容区 -->
     <main class="main-content">
       <!-- 编辑器区域 -->
@@ -91,7 +62,7 @@
           <div class="upload-btn" @click="addCodeBlock" title="代码块">
             <img class="upload-icon" src="/code-block.svg" alt="代码块">
           </div>
-          <div class="upload-btn" @click="addTable" title="表格">
+          <div class="upload-btn" @click="showTableModal = true" title="表格">
             <img class="upload-icon" src="/table.svg" alt="表格">
           </div>
         </div>
@@ -133,57 +104,27 @@
       </div>
     </div>
   </div>
+  <TextToolbar
+      :editor-ref="editorRef"
+      @format="addContentToEditor"
+      :is-dark-mode="isDarkMode"
+  />
   <!-- 自定义弹窗 -->
-  <div
-      class="custom-toast"
-      :class="{
-        'toast-show': showToast,
-        'toast-success': toastType === 'success',
-        'toast-error': toastType === 'error'
-      }"
-  >
-    <div class="toast-icon">
-      <span v-if="toastType === 'success'">✓</span>
-      <span v-if="toastType === 'error'">✕</span>
-    </div>
-    <div class="toast-message">{{ toastMessage }}</div>
-  </div>
+  <CustomToast
+      :show-toast="showToast"
+      :toast-message="toastMessage"
+      :toast-type="toastType"
+      @close="showToast = false"
+  />
 
   <!-- 表格配置弹窗 -->
-  <div class="table-modal-mask" v-if="showTableModal">
-    <div class="table-modal" :class="{ 'app-dark': isDarkMode }">
-      <div class="modal-header">
-        <h3>插入表格</h3>
-        <button class="modal-close" @click="showTableModal = false">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>行数：</label>
-          <input
-              type="number"
-              v-model.number="tableRows"
-              min="1"
-              max="20"
-              class="number-input"
-          >
-        </div>
-        <div class="form-group">
-          <label>列数：</label>
-          <input
-              type="number"
-              v-model.number="tableCols"
-              min="1"
-              max="10"
-              class="number-input"
-          >
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-btn" @click="showTableModal = false">取消</button>
-        <button class="confirm-btn" @click="confirmTable">确认插入</button>
-      </div>
-    </div>
-  </div>
+  <TableModal
+      :visible="showTableModal"
+      :is-dark-mode="isDarkMode"
+      @close="showTableModal = false"
+      @confirm="handleTableConfirm"
+      @error="(msg: any) => showCustomToast(msg, 'error')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -200,8 +141,25 @@ import {syncScroll} from "../utils/scrollHandler.ts";
 import {initialMarkdownContent} from "../consts/markdownContent.ts";
 import {pdfConfig, pdfOptions} from "../consts/pdfConfig.ts";
 import {generateMarkdownTable} from "../utils/tableGenerator.ts";
-import type {ContentType} from "../types/contentType.ts";
-import {textHandler} from "../utils/textHandler.ts";
+import CustomToast from "../components/customToast.vue";
+import TableModal from "../components/tableModal.vue";
+import TextToolbar from "../components/textToolbar.vue";
+import {markdownHandler, pdfHandler} from "../utils/downloadHandler.ts";
+
+// 状态管理
+const isDarkMode = ref(true); // 暗黑模式
+const isLoading = ref(false);
+const showDropdown = ref(false);
+const showToast = ref(false);// 弹窗状态
+const toastMessage = ref('');
+const toastType = ref('success'); // success/error
+// 获取DOM引用
+const editorRef = ref<HTMLTextAreaElement>();
+const previewRef = ref<HTMLDivElement>();
+// 用于防止滚动事件循环触发的标志
+const isSyncing = ref(false);
+// 表格弹窗相关状态
+const showTableModal = ref(false); // 控制弹窗显示
 
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
@@ -220,94 +178,21 @@ const renderedMarkdown = computed(() => {
   return DOMPurify.sanitize(marked.parse(markdownContent.value));
 });
 
-// 状态管理
-const isDarkMode = ref(true); // 暗黑模式
-const isLoading = ref(false);
-const showDropdown = ref(false);
-const showToast = ref(false);// 弹窗状态
-const toastMessage = ref('');
-const toastType = ref('success'); // success/error
-// 获取DOM引用
-const editorRef = ref<HTMLTextAreaElement>();
-const previewRef = ref<HTMLDivElement>();
-// 用于防止滚动事件循环触发的标志
-const isSyncing = ref(false);
-// 工具栏相关状态
-const toolbarRef = ref<HTMLDivElement>();
-const toolbarLeft = ref(0); // 工具栏左侧定位
-const toolbarTop = ref(0); // 工具栏顶部定位
-const isDragging = ref(false); // 是否正在拖拽
-const startX = ref(0); // 拖拽起始X坐标
-const startY = ref(0); // 拖拽起始Y坐标
-// 表格弹窗相关状态
-const showTableModal = ref(false); // 控制弹窗显示
-const tableRows = ref(3); // 默认3行
-const tableCols = ref(3); // 默认3列
-
-// 格式化选中文本（根据按钮类型添加对应的Markdown格式）
-const formatText = (type: ContentType) => {
-  if (!editorRef.value) return;
-  // 获取选中的文本和位置
-  const selectedText = window.getSelection()?.toString() || '';
-
-  // 根据类型添加对应的Markdown格式
-  let formattedText = textHandler(type, selectedText);
-
-  addContentToEditor(formattedText);
-};
-
-
 // 添加代码块
 const addCodeBlock = () => {
   addContentToEditor(`\n\`\`\`javascript\n\n\`\`\``);
 };
 
-// 打开表格弹窗
-const addTable = () => {
-  showTableModal.value = true;
-  // 重置默认值（可选）
-  tableRows.value = 3;
-  tableCols.value = 3;
-};
-
-// 确认生成表格
-const confirmTable = () => {
-  if (!editorRef.value) return;
-
-  // 校验输入（至少1行1列）
-  if (tableRows.value < 1 || tableCols.value < 1) {
-    showCustomToast('行数和列数不能小于1哦', 'error');
-    return;
-  }
-  if (tableRows.value > 14 || tableCols.value > 14) {
-    showCustomToast('行数(列数)太多啦，请控制在14以内', 'error');
-    return;
-  }
-
-
-  // 生成Markdown表格
-  const tableContent = generateMarkdownTable(
-      tableRows.value,
-      tableCols.value
-  );
-
-  addContentToEditor(tableContent);
-
-  // 关闭弹窗并提示
+// 处理确认插入表格
+const handleTableConfirm = (rows: number, cols: number) => {
+  // 关闭弹窗
   showTableModal.value = false;
-  showCustomToast(`已插入 ${tableRows.value}行×${tableCols.value}列 表格`);
-};
-
-
-// 显示自定义弹窗
-const showCustomToast = (message: any, type = 'success') => {
-  toastMessage.value = message;
-  toastType.value = type;
-  showToast.value = true;
-  // 3秒后自动关闭
-  setTimeout(() => {
-    showToast.value = false;
-  }, 3000);
+  // 生成表格内容（复用原有的generateMarkdownTable方法）
+  const tableContent = generateMarkdownTable(rows, cols);
+  // 插入到编辑器
+  addContentToEditor(tableContent);
+  // 显示成功提示
+  showCustomToast(`已插入 ${rows}行×${cols}列 表格`);
 };
 
 // 打开图片选择
@@ -339,7 +224,6 @@ const handleImageSelect = async (e: Event) => {
     // 显示加载状态
     isLoading.value = true;
     showCustomToast('正在压缩图片...', 'success');
-
     // 调用压缩函数
     const compressedFile = await compressImage(
         file,
@@ -348,7 +232,6 @@ const handleImageSelect = async (e: Event) => {
         100,    // 最小压缩尺寸(KB)
         200     // 目标尺寸(KB)
     );
-
     // 读取压缩后的文件为DataURL
     const reader = new FileReader();
     reader.onload = (event: ProgressEvent<FileReader>) => {
@@ -356,7 +239,7 @@ const handleImageSelect = async (e: Event) => {
       // 插入Markdown内容
       const fileName = compressedFile.name.replace(/\.[^/.]+$/, '');
       const imageMarkdown = `![${fileName}](${imageUrl})`;
-      markdownContent.value += `\n${imageMarkdown}`;
+      addContentToEditor(`\n${imageMarkdown}`);
       showCustomToast(`图片压缩成功，大小: ${(compressedFile.size / 1024).toFixed(2)}KB`);
     };
     reader.readAsDataURL(compressedFile);
@@ -384,7 +267,7 @@ const handleFileSelect = async (e: Event) => {
     isLoading.value = true;
     const content = await FileUploadHandler.handleFile(file);
     showCustomToast('文件内容解析完成！', 'success');
-    markdownContent.value += content;
+    addContentToEditor(content);
 
   } catch (error) {
     console.error('文件内容读取失败:', error);
@@ -409,15 +292,7 @@ const handleClickOutside = (e: any) => {
 const downloadMarkdown = () => {
   showDropdown.value = false;
   try {
-    const blob = new Blob([markdownContent.value], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '素笔Mark导出文档.md';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    markdownHandler(markdownContent.value);
     showCustomToast('Markdown文件下载成功'); // 替换alert
   } catch (error: any) {
     showCustomToast('下载失败：' + error.message, 'error'); // 替换alert
@@ -428,31 +303,9 @@ const downloadMarkdown = () => {
 const downloadPdf = () => {
   showDropdown.value = false;
   isLoading.value = true;
-
-  const tempElement = document.createElement('div');
-  // 1. 复制预览区内容
-  tempElement.innerHTML = renderedMarkdown.value;
-
-  // 2. 手动注入所需样式（关键步骤）
-  const style = document.createElement('style');
-  style.textContent = pdfConfig;
-  tempElement.appendChild(style);
-
-  // 3. 代码高亮（保持现有逻辑）
-  tempElement.querySelectorAll('pre code').forEach((block) => {
-    hljs.highlightElement(<HTMLElement>block);
-  });
-
-  // 4. 设置临时元素基础样式（移除强制白色背景的冲突代码）
-  tempElement.style.maxWidth = '800px';
-  tempElement.style.margin = '0 auto';
-  tempElement.style.padding = '40px';
-  tempElement.style.backgroundColor = '#ffffff'; // 保持白色背景便于打印
-  tempElement.style.color = '#333333';
-
+  const tempElement = pdfHandler(renderedMarkdown);
   document.body.appendChild(tempElement);
-
-  // 5. 生成并下载PDF
+  // 生成并下载PDF
   html2pdf().from(tempElement).set(pdfOptions).save()
       .then(() => showCustomToast('PDF文件下载成功'))
       .catch((error: any) => showCustomToast('PDF生成失败：' + error.message, 'error'))
@@ -471,58 +324,6 @@ const handlePreviewScroll = () => {
   syncScroll(previewRef, editorRef, isSyncing);
 };
 
-// 开始拖拽（鼠标按下时）
-const startDrag = (e: MouseEvent) => {
-  // 为 event.target 指定类型为 HTMLElement
-  const target = e.target as HTMLElement;
-
-  // 只有点击工具栏或拖拽手柄时才触发拖拽
-  if (e.target === toolbarRef.value || (target && target.classList.contains('drag-handle'))) {
-    isDragging.value = true;
-    startX.value = e.clientX - toolbarLeft.value;
-    startY.value = e.clientY - toolbarTop.value;
-
-    // 添加鼠标移动和释放事件监听
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('mouseup', stopDrag);
-  }
-};
-// 拖拽中（鼠标移动时）
-const handleDrag = (e: MouseEvent) => {
-  if (!isDragging.value || !toolbarRef.value) return;
-
-  // 获取工具栏自身尺寸
-  const toolbarWidth = toolbarRef.value.offsetWidth;
-  const toolbarHeight = toolbarRef.value.offsetHeight;
-
-  // 获取屏幕可视区域尺寸（减去滚动条宽度，避免超出）
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
-  // 计算新位置（基于鼠标移动）
-  let newLeft = e.clientX - startX.value;
-  let newTop = e.clientY - startY.value;
-
-  // 边界限制：左侧不小于0，右侧不超过屏幕宽度 - 工具栏宽度
-  newLeft = Math.max(0, Math.min(newLeft, screenWidth - toolbarWidth));
-
-  // 边界限制：顶部不小于0，底部不超过屏幕高度 - 工具栏高度
-  newTop = Math.max(0, Math.min(newTop, screenHeight - toolbarHeight - 10));
-
-  // 更新工具栏位置
-  toolbarLeft.value = newLeft;
-  toolbarTop.value = newTop;
-};
-
-// 结束拖拽（鼠标释放时）
-const stopDrag = () => {
-  if (isDragging.value) {
-    isDragging.value = false;
-    // 移除事件监听
-    document.removeEventListener('mousemove', handleDrag);
-    document.removeEventListener('mouseup', stopDrag);
-  }
-};
 
 // 解决Tab按键冲突
 const handleKeyDown = (e: KeyboardEvent) => {
@@ -561,24 +362,17 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 };
 
-//  初始化工具栏位置
-const initToolbarPosition = () => {
-  if (!toolbarRef.value) return;
 
-  const toolbarWidth = toolbarRef.value.offsetWidth;
-  const toolbarHeight = toolbarRef.value.offsetHeight;
-  const marginLeft = 10; // 距离屏幕边缘的间距（可选，增加留白）
-  const marginTop = 60;
-
-  // 屏幕可用宽度和高度（减去工具栏尺寸和边缘间距）
-  const maxLeft = window.innerWidth - marginLeft - toolbarWidth;
-  const maxTop = window.innerHeight - marginTop - toolbarHeight;
-
-  // 确保初始位置在屏幕内（取计算值和0的最大值，避免负数）
-  toolbarLeft.value = Math.max(marginLeft, maxLeft);
-  toolbarTop.value = Math.max(marginTop, maxTop);
+// 工具类：显示自定义弹窗
+const showCustomToast = (message: any, type = 'success') => {
+  toastMessage.value = message;
+  toastType.value = type;
+  showToast.value = true;
+  // 3秒后自动关闭
+  setTimeout(() => {
+    showToast.value = false;
+  }, 3000);
 };
-
 
 // 工具类：插入内容到光标处
 const addContentToEditor = (content: string) => {
@@ -611,18 +405,11 @@ onMounted(() => {
   hljs.highlightAll();
   // 监听点击事件关闭下拉菜单
   document.addEventListener('click', handleClickOutside);
-
-  // 初始化位置
-  initToolbarPosition();
-
-  // 监听窗口大小变化，重新调整位置
-  window.addEventListener('resize', initToolbarPosition);
 });
 
 // 记得在组件卸载时移除事件监听
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
-  window.removeEventListener('resize', initToolbarPosition);
 });
 </script>
 

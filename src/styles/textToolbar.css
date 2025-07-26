@@ -1,0 +1,42 @@
+
+/* 顶部固定工具栏样式 */
+.text-toolbar {
+    position: absolute; /* 相对于编辑器容器定位 */
+    top: 50px; /* 初始位置：在标题下方 */
+    left: 20px;
+    z-index: 100; /* 确保在编辑器上方 */
+    background: #fff url("../assets/drag.svg") no-repeat right 8px center;
+    background-size: inherit;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    gap: 6px;
+    cursor: move; /* 鼠标悬停时显示拖动图标 */
+    padding: 4px 40px 4px 4px;
+}
+
+.text-toolbar.app-dark  {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+.toolbar-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 2px;
+    background-color: transparent;
+    cursor: pointer; /* 按钮恢复点击光标 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.toolbar-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.app-dark .toolbar-btn:hover {
+    background-color: #444;
+}
