@@ -59,7 +59,7 @@
           <div class="upload-btn" @click="openFileSelect('.html,.md,.pdf,.txt,.doc,.docx')" title="解析文件">
             <img class="upload-icon" src="/upload-file.svg" alt="解析文件">
           </div>
-          <div class="upload-btn" @click="addCodeBlock" title="代码块">
+          <div class="upload-btn" @click="showCodeModal = true" title="代码块">
             <img class="upload-icon" src="/code-block.svg" alt="代码块">
           </div>
           <div class="upload-btn" @click="showTableModal = true" title="表格">
@@ -116,6 +116,16 @@
       :toast-type="toastType"
       @close="showToast = false"
   />
+  <!-- 代码块配置弹窗 -->
+  <CodeBlockModal
+      :visible="showCodeModal"
+      :is-dark-mode="isDarkMode"
+      :default-language="defaultLang"
+      :default-content="defaultCode"
+      @close="showCodeModal = false"
+      @confirm="handleCodeBlockConfirm"
+      @error="(msg: any) => showCustomToast(msg, 'error')"
+  />
 
   <!-- 表格配置弹窗 -->
   <TableModal
@@ -145,6 +155,7 @@ import TableModal from "../components/tableModal.vue";
 import TextToolbar from "../components/textToolbar.vue";
 import {markdownHandler, pdfHandler} from "../utils/downloadHandler.ts";
 import {keyboardHandler} from "../utils/keyboardHandler.ts";
+import CodeBlockModal from "../components/codeBlockModal.vue";
 
 // 状态管理
 const isDarkMode = ref(true); // 暗黑模式
@@ -160,13 +171,16 @@ const previewRef = ref<HTMLDivElement>();
 const isSyncing = ref(false);
 // 表格弹窗相关状态
 const showTableModal = ref(false); // 控制弹窗显示
+const showCodeModal = ref(false);
+const defaultLang = ref('javascript');
+const defaultCode = ref();
 
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
-  // @ts-ignore
+// @ts-ignore
   highlight: function (code: any, language: any) {
-    const validLanguage = hljs.getLanguage(language) ? language : 'javascript';
-    return hljs.highlight(code, {language: validLanguage}).value;
+    const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+    return hljs.highlight(code, { language: validLanguage }).value;
   },
 });
 // 初始化Markdown内容
@@ -178,9 +192,14 @@ const renderedMarkdown = computed(() => {
   return DOMPurify.sanitize(marked.parse(markdownContent.value));
 });
 
-// 添加代码块
-const addCodeBlock = () => {
-  addContentToEditor(`\n\`\`\`javascript\n\n\`\`\``);
+// 处理确认插入代码块
+const handleCodeBlockConfirm = (language: string, content: string) => {
+  // 生成Markdown代码块语法
+  const codeBlock = `\n\`\`\`${language}\n${content || ''}\n\`\`\``;
+  // 插入到编辑器
+  addContentToEditor(codeBlock);
+  // 关闭弹窗
+  showCodeModal.value = false;
 };
 
 // 处理确认插入表格
@@ -338,5 +357,5 @@ onBeforeUnmount(() => {
 @import '../styles/preview_area.css';
 @import '../styles/common.css';
 @import '../styles/header.css';
-@import '../styles/toast.css';
+@import '../styles/loading.css';
 </style>

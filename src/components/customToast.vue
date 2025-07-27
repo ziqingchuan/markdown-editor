@@ -22,7 +22,7 @@ import { defineProps, onMounted } from 'vue';
 const props = defineProps<{
   showToast: boolean; // 控制弹窗显示/隐藏
   toastMessage: string; // 弹窗内容
-  toastType: 'success' | 'error'; // 弹窗类型
+  toastType: string; // 弹窗类型
   duration?: number; // 自动关闭时间（默认3000ms）
 }>();
 

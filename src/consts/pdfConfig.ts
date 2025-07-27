@@ -48,16 +48,23 @@ export const pdfConfig =  `
       line-height: 1.5;
     }
     blockquote {
-      border-left: 4px solid #0d6ae3;
-      border-top: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-      border-bottom: 1px solid #ddd;
-      background-color: #f5f5f5;
-      padding: 1rem;
-      margin: 0 0 1rem 0;
-      color: #666;
-      border-radius: 0 6px 6px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* 左侧蓝色边框 */
+    border-left: 6px solid #3183ee;
+    /* 其他边框为灰色 */
+    border-top: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    /* 灰色背景 */
+    background-color: #f6f6f6;
+    /* 内边距和外边距 */
+    padding: 0.5rem;
+    margin: 0 0 1rem 0;
+    /* 文字颜色 */
+    color: #666;
+    /* 圆角 */
+    border-radius: 10px;
+    /* 阴影效果 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     img {
       max-width: 100%;
