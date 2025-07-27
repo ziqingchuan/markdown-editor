@@ -53,10 +53,10 @@
           <span>编辑区域</span>
 
           <!-- 功能按钮组 -->
-          <div class="upload-btn" @click="openImageDialog" title="上传图片" style="margin-left: auto">
+          <div class="upload-btn" @click="openFileSelect('image/*')" title="上传图片" style="margin-left: auto">
             <img class="upload-icon" src="/upload-picture.svg" alt="上传图片">
           </div>
-          <div class="upload-btn" @click="openFileDialog" title="解析文件">
+          <div class="upload-btn" @click="openFileSelect('.html,.md,.pdf,.txt,.doc,.docx')" title="解析文件">
             <img class="upload-icon" src="/upload-file.svg" alt="解析文件">
           </div>
           <div class="upload-btn" @click="addCodeBlock" title="代码块">
@@ -135,16 +135,16 @@ import DOMPurify from 'dompurify';
 import html2pdf from 'html2pdf.js';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/rainbow.css';
-import compressImage from "../utils/imageCompressor.ts";
-import {FileUploadHandler} from "../utils/fileUploadHandler.ts";
+import {FileUploadHandler} from "../utils/uploadHandler.ts";
 import {syncScroll} from "../utils/scrollHandler.ts";
 import {initialMarkdownContent} from "../consts/markdownContent.ts";
-import {pdfConfig, pdfOptions} from "../consts/pdfConfig.ts";
+import {pdfOptions} from "../consts/pdfConfig.ts";
 import {generateMarkdownTable} from "../utils/tableGenerator.ts";
 import CustomToast from "../components/customToast.vue";
 import TableModal from "../components/tableModal.vue";
 import TextToolbar from "../components/textToolbar.vue";
 import {markdownHandler, pdfHandler} from "../utils/downloadHandler.ts";
+import {keyboardHandler} from "../utils/keyboardHandler.ts";
 
 // 状态管理
 const isDarkMode = ref(true); // 暗黑模式
@@ -195,88 +195,40 @@ const handleTableConfirm = (rows: number, cols: number) => {
   showCustomToast(`已插入 ${rows}行×${cols}列 表格`);
 };
 
-// 打开图片选择
-const openImageDialog = () => {
+const openFileSelect = (accept: string) => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = 'image/*';
-  input.onchange = handleImageSelect;
+  input.accept = accept;
+  const fileType = accept === 'image/*' ? 'img' : 'file';
+  input.onchange = (e) => handleFileSelect(e, fileType);
+
   input.click();
 };
 
-// 打开文件选择
-const openFileDialog = () => {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.html,.md,.pdf,.txt,.doc,.docx';
-  input.onchange = handleFileSelect;
-  input.click();
-};
-
-// 处理图片选择
-const handleImageSelect = async (e: Event) => {
+// 处理文件选择（接收事件和文件类型）
+const handleFileSelect = async (e: Event, fileType: 'img' | 'file') => {
   const target = e.target as HTMLInputElement;
   const file = target.files?.[0];
-
   if (!file) return;
-
   try {
-    // 显示加载状态
     isLoading.value = true;
-    showCustomToast('正在压缩图片...', 'success');
-    // 调用压缩函数
-    const compressedFile = await compressImage(
-        file,
-        0.7,    // 初始质量
-        1200,   // 最大宽度
-        100,    // 最小压缩尺寸(KB)
-        200     // 目标尺寸(KB)
-    );
-    // 读取压缩后的文件为DataURL
-    const reader = new FileReader();
-    reader.onload = (event: ProgressEvent<FileReader>) => {
-      const imageUrl = event.target?.result as string;
-      // 插入Markdown内容
-      const fileName = compressedFile.name.replace(/\.[^/.]+$/, '');
-      const imageMarkdown = `![${fileName}](${imageUrl})`;
-      addContentToEditor(`\n${imageMarkdown}`);
-      showCustomToast(`图片压缩成功，大小: ${(compressedFile.size / 1024).toFixed(2)}KB`);
-    };
-    reader.readAsDataURL(compressedFile);
+    // 根据文件类型处理
+    let content: string;
+    if (fileType === 'img') {
+      // 处理图片
+      content = await FileUploadHandler.handleImage(file);
+    } else {
+      content = await FileUploadHandler.handleFile(file);
+    }
 
+    showCustomToast('上传成功！', 'success');
+    addContentToEditor(`\n${content}`);
   } catch (error) {
-    console.error('图片处理失败:', error);
-    showCustomToast('图片压缩失败，请重试', 'error');
+    console.error('上传失败:', error);
+    showCustomToast('上传失败，请重试', 'error');
   } finally {
-    // 关闭加载状态
     isLoading.value = false;
-    // 清空input值，允许重复选择同一文件
-    target.value = '';
-  }
-};
-
-// 处理文件选择
-const handleFileSelect = async (e: Event) => {
-  const target = e.target as HTMLInputElement;
-  const file = target.files?.[0];
-
-  if (!file) return;
-
-  try {
-    // 显示加载状态
-    isLoading.value = true;
-    const content = await FileUploadHandler.handleFile(file);
-    showCustomToast('文件内容解析完成！', 'success');
-    addContentToEditor(content);
-
-  } catch (error) {
-    console.error('文件内容读取失败:', error);
-    showCustomToast('文件内容读取失败，请重试', 'error');
-  } finally {
-    // 关闭加载状态
-    isLoading.value = false;
-    // 清空input值，允许重复选择同一文件
-    target.value = '';
+    target.value = ''; // 允许重复选择同一文件
   }
 };
 
@@ -326,42 +278,10 @@ const handlePreviewScroll = () => {
 
 
 // 解决Tab按键冲突
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    const editor = editorRef.value;
-    if (!editor) return;
-
-    // 保存当前滚动位置
-    const scrollTop = editor.scrollTop;
-
-    // 获取光标位置
-    const startPos = editor.selectionStart;
-    const endPos = editor.selectionEnd;
-
-    // 保存原始内容引用
-    const originalContent = markdownContent.value;
-
-    // 计算新内容
-    markdownContent.value = originalContent.substring(0, startPos) +
-        '    ' +  // 插入4个空格
-        originalContent.substring(endPos);
-
-    // 使用$nextTick确保DOM更新后再设置光标
-    nextTick(() => {
-      if (editor) {
-        // 设置新光标位置（原位置 + 4个空格）
-        const newCursorPos = startPos + 4;
-        editor.selectionStart = newCursorPos;
-        editor.selectionEnd = newCursorPos;
-
-        // 恢复滚动位置
-        editor.scrollTop = scrollTop;
-      }
-    });
-  }
+const handleKeyDown = async (e: KeyboardEvent) => {
+  // 传递依赖的响应式变量和DOM引用
+  await keyboardHandler(e, editorRef, markdownContent);
 };
-
 
 // 工具类：显示自定义弹窗
 const showCustomToast = (message: any, type = 'success') => {

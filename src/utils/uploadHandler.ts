@@ -4,6 +4,8 @@
  */
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
+import compressImage from "./imageCompressor.ts";
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.mjs';
 export const FileUploadHandler = {
     async handleFile(file: File): Promise<string> {
@@ -61,7 +63,7 @@ export const FileUploadHandler = {
             for (let i = 1; i <= numPages; i++) {
                 const page = await pdf.getPage(i);
                 const content = await page.getTextContent();
-                const { items, styles } = content;
+                const { items } = content;
 
                 // 存储当前页的文本行
                 const lines: string[] = [];
@@ -144,5 +146,41 @@ export const FileUploadHandler = {
             console.error('DOC/DOCX 解析失败:', error);
             return '无法解析 DOC/DOCX 文件，请检查文件内容！';
         }
+    },
+
+    async handleImage(file: File): Promise<string> {
+        // 使用Promise包装异步操作
+        return new Promise(async (resolve, reject) => {
+            try {
+                const compressedFile = await compressImage(
+                    file,
+                    0.7,    // 初始质量
+                    1200,   // 最大宽度
+                    100,    // 最小压缩尺寸(KB)
+                    200     // 目标尺寸(KB)
+                );
+
+                const reader = new FileReader();
+
+                // 异步读取完成后执行
+                reader.onload = (event: ProgressEvent<FileReader>) => {
+                    const imageUrl = event.target?.result as string;
+                    const fileName = compressedFile.name.replace(/\.[^/.]+$/, '');
+                    const result = `![${fileName}](${imageUrl})`;
+                    resolve(result); // 将结果通过Promise返回
+                };
+
+                // 读取失败处理
+                reader.onerror = () => {
+                    reject(new Error('图片读取失败'));
+                };
+
+                // 开始读取文件
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                // 压缩过程出错时 reject
+                reject(error);
+            }
+        });
     }
 };
