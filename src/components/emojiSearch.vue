@@ -67,7 +67,7 @@ const filteredEmojis = computed(() => {
 });
 
 // 格式化shortcode
-const formatShortcode = (shortcode) => {
+const formatShortcode = (shortcode: string) => {
   if (shortcode.length <= 2) return shortcode;
   return shortcode.length > 12 ? shortcode.substring(0, 9) + '...' : shortcode;
 };
@@ -80,7 +80,7 @@ const emit = defineEmits<{
 }>();
 
 // 处理emoji选择
-const handleSelect = (unicode) => {
+const handleSelect = (unicode: string) => {
   if (!unicode) {
     emit('error', '无效的表情符号');
     return;
