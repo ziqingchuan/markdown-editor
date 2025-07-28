@@ -350,8 +350,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-@import '../styles/edit_area.css';
-@import '../styles/preview_area.css';
+@import '../styles/editArea.css';
+@import '../styles/previewArea.css';
 @import '../styles/common.css';
 @import '../styles/header.css';
 @import '../styles/loading.css';

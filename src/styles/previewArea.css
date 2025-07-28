@@ -85,6 +85,7 @@
     border-radius: 10px;
     /* 阴影效果 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
 }
 
 /* 暗黑模式引用样式 */

@@ -39,8 +39,10 @@
     padding: 5px;
     border-radius: 50%;
     background-color: #ffffff;
+    border: 1px solid #c6c6c6;
     font-weight: bold;
 }
+
 
 .header-actions {
     display: flex;
