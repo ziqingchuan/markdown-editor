@@ -21,12 +21,9 @@
           <!-- 下载按钮组 -->
           <div class="download-btn-group">
             <button class="primary-btn" @click.stop="showDropdown = !showDropdown">
-              <span>导出</span>
+              <span>导出 ｜ ▼</span>
             </button>
             <div class="dropdown-menu" :class="{ 'dropdown-show': showDropdown }" @click.stop>
-              <button class="dropdown-btn" @click.stop="showDropdown = !showDropdown">
-                ▼
-              </button>
               <!-- 下载选项 -->
               <div class="dropdown-options">
                 <div class="dropdown-item" @click="downloadMarkdown">
@@ -169,7 +166,7 @@ const editorRef = ref<HTMLTextAreaElement>();
 const previewRef = ref<HTMLDivElement>();
 // 用于防止滚动事件循环触发的标志
 const isSyncing = ref(false);
-// 表格弹窗相关状态
+// 弹窗相关状态
 const showTableModal = ref(false); // 控制弹窗显示
 const showCodeModal = ref(false);
 const defaultLang = ref('javascript');

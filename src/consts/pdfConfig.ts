@@ -1,4 +1,45 @@
 export const pdfConfig =  `
+    h1, h2, h3 {
+        margin: 1.5rem 0 1rem;
+        font-weight: 600;
+    }
+    h1 {
+    font-size: 1.8rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.3rem;
+}
+
+    h2 {
+        font-size: 1.5rem;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.3rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+    }
+    
+    p {
+        margin-bottom: 1rem;
+        line-height: 1.7;
+    }
+    
+    ul, ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+    }
+    
+    :ul {
+        list-style-type: disc;
+    }
+    
+    ol {
+        list-style-type: decimal;
+    }
+    
+    li {
+        margin-bottom: 0.5rem;
+    }
     /* 表格样式 */
     table {
       width: 100%;
@@ -48,22 +89,15 @@ export const pdfConfig =  `
       line-height: 1.5;
     }
     blockquote {
-    /* 左侧蓝色边框 */
     border-left: 6px solid #3183ee;
-    /* 其他边框为灰色 */
     border-top: 1px solid #ddd;
     border-right: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
-    /* 灰色背景 */
     background-color: #f6f6f6;
-    /* 内边距和外边距 */
     padding: 0.5rem;
     margin: 0 0 1rem 0;
-    /* 文字颜色 */
     color: #666;
-    /* 圆角 */
     border-radius: 10px;
-    /* 阴影效果 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     img {
