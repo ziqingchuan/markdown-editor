@@ -1,0 +1,184 @@
+.emoji-modal-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.emoji-modal {
+    width: 90%;
+    max-width: 700px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 暗黑模式 */
+.emoji-modal.app-dark {
+    background-color: #1e1e1e;
+    color: #fff;
+}
+
+/* 头部样式 */
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.app-dark .modal-header {
+    border-bottom-color: #333;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    padding: 4px;
+}
+
+.app-dark .modal-close {
+    color: #ccc;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.app-dark .modal-close:hover {
+    color: #fff;
+}
+
+/* 主体内容样式 */
+.modal-body {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/Opera */
+    }
+}
+
+/* 搜索框样式 */
+.search-container {
+    margin-bottom: 20px;
+    display:  flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-wrapper {
+    position: relative;
+}
+
+.search-input {
+    width: 500px;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-input.dark-input {
+    background-color: #333;
+    border-color: #444;
+    color: #fff;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.app-dark .search-icon {
+    color: #aaa;
+}
+
+/* Emoji网格布局 */
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .emoji-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .emoji-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Emoji卡片样式 */
+.emoji-card {
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.emoji-card.dark-card {
+    background-color: #2d2d2d;
+}
+
+.emoji-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.emoji-char {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.emoji-code {
+    font-size: 12px;
+    color: #666;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    text-align: center;
+    word-break: break-all;
+}
+
+.app-dark .emoji-code {
+    color: #aaa;
+}

@@ -81,6 +81,7 @@
 
 .toggle-thumb-dark {
     transform: translateX(24px);
+    background-color: #272727;
 }
 
 /* 模式切换按钮图标 */

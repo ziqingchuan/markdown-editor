@@ -62,6 +62,9 @@
           <div class="upload-btn" @click="showTableModal = true" title="表格">
             <img class="upload-icon" src="/table.svg" alt="表格">
           </div>
+          <div class="upload-btn" @click="showEmojiModal = true" title="emoji">
+            <img class="upload-icon" src="/emoji.svg" alt="emoji">
+          </div>
         </div>
 
         <textarea
@@ -132,6 +135,13 @@
       @confirm="handleTableConfirm"
       @error="(msg: any) => showCustomToast(msg, 'error')"
   />
+  <!-- Emoji 搜索弹窗 -->
+  <EmojiSearch
+      :visible="showEmojiModal"
+      :is-dark-mode="isDarkMode"
+      @close="showEmojiModal = false"
+      @select-emoji="handleEmojiSelect"
+  />
 </template>
 
 <script setup lang="ts">
@@ -153,6 +163,7 @@ import TextToolbar from "../components/textToolbar.vue";
 import {markdownHandler, pdfHandler} from "../utils/downloadHandler.ts";
 import {keyboardHandler} from "../utils/keyboardHandler.ts";
 import CodeBlockModal from "../components/codeBlockModal.vue";
+import EmojiSearch from "../components/emojiSearch.vue";
 
 // 状态管理
 const isDarkMode = ref(true); // 暗黑模式
@@ -171,6 +182,7 @@ const showTableModal = ref(false); // 控制弹窗显示
 const showCodeModal = ref(false);
 const defaultLang = ref('javascript');
 const defaultCode = ref();
+const showEmojiModal =  ref(false);
 
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({
@@ -246,6 +258,13 @@ const handleFileSelect = async (e: Event, fileType: 'img' | 'file') => {
     isLoading.value = false;
     target.value = ''; // 允许重复选择同一文件
   }
+};
+
+const handleEmojiSelect = (emojiUnicode: string) => {
+  // 调用现有方法将 Emoji 插入到编辑器光标位置
+  addContentToEditor(emojiUnicode);
+  // 关闭弹窗
+  showEmojiModal.value = false;
 };
 
 // 点击空白处关闭下拉菜单
@@ -343,7 +362,7 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside);
 });
 
-// 记得在组件卸载时移除事件监听
+// 在组件卸载时移除事件监听
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
 });
