@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" :class="{ 'app-dark': isDarkMode }">
     <!-- 顶部导航栏 -->
-    <header class="header">
+    <header v-if="!isFullScreen" class="header">
       <div class="header-content">
         <div class="logo">
           <i class="logo-icon">
@@ -41,7 +41,7 @@
       </div>
     </header>
     <!-- 主内容区 -->
-    <main class="main-content">
+    <main class="main-content" :class="{ 'full-screen': isFullScreen }">
       <!-- 编辑器区域 -->
       <div class="editor-container">
 
@@ -82,6 +82,13 @@
         <div class="panel-header preview-header">
           <img class="panel-icon" src="/preview.svg" alt="预览">
           <span>预览区域</span>
+          <!-- 功能按钮组 -->
+          <div v-if="!isFullScreen" class="upload-btn" @click="isFullScreen = true" title="全屏" style="margin-left: auto">
+            <img class="upload-icon" src="/full-screen.svg" alt="全屏">
+          </div>
+          <div v-if="isFullScreen" class="upload-btn" @click="isFullScreen = false" title="取消全屏" style="margin-left: auto">
+            <img class="upload-icon" src="/exit-full-screen.svg" alt="取消全屏">
+          </div>
         </div>
         <div class="preview-content"
              v-html="renderedMarkdown"
@@ -92,7 +99,7 @@
     </main>
 
     <!-- 页脚 -->
-    <footer class="footer">
+    <footer v-if="!isFullScreen" class="footer">
       <p>© 2025    <a target="_blank" href="https://try-catch.life/">try-catch.life</a></p>
     </footer>
 
@@ -136,7 +143,7 @@
       @error="(msg: any) => showCustomToast(msg, 'error')"
   />
   <!-- Emoji 搜索弹窗 -->
-  <EmojiSearch
+  <EmojiModal
       :visible="showEmojiModal"
       :is-dark-mode="isDarkMode"
       @close="showEmojiModal = false"
@@ -163,7 +170,7 @@ import TextToolbar from "../components/textToolbar.vue";
 import {markdownHandler, pdfHandler} from "../utils/downloadHandler.ts";
 import {keyboardHandler} from "../utils/keyboardHandler.ts";
 import CodeBlockModal from "../components/codeBlockModal.vue";
-import EmojiSearch from "../components/emojiSearch.vue";
+import EmojiModal from "../components/emojiModal.vue";
 
 // 状态管理
 const isDarkMode = ref(true); // 暗黑模式
@@ -183,6 +190,7 @@ const showCodeModal = ref(false);
 const defaultLang = ref('javascript');
 const defaultCode = ref();
 const showEmojiModal =  ref(false);
+const isFullScreen = ref(false); // 全屏状态
 
 // 配置marked使用highlight.js高亮代码
 marked.setOptions({

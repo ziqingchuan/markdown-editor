@@ -28,6 +28,10 @@
     height: calc(100vh - 300px);
 }
 
+.main-content.full-screen {
+    padding: 0;
+}
+
 /* 页脚样式 */
 .footer {
     text-align: center;

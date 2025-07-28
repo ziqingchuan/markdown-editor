@@ -74,8 +74,8 @@ const handleConfirm = () => {
     emit('error', '行数和列数不能小于1');
     return;
   }
-  if (rows.value > 14 || cols.value > 14) {
-    emit('error', '行数(列数)请控制在14以内');
+  if (cols.value > 14) {
+    emit('error', '请控制列数在15以内哦');
     return;
   }
   // 向父组件传递选中的行数和列数

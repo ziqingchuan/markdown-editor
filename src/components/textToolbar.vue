@@ -115,7 +115,7 @@ const initToolbarPosition = () => {
   const toolbarWidth = toolbarRef.value.offsetWidth;
   const toolbarHeight = toolbarRef.value.offsetHeight;
   const marginLeft = 10;
-  const marginTop = 60;
+  const marginTop = 30;
 
   const maxLeft = window.innerWidth - marginLeft - toolbarWidth;
   const maxTop = window.innerHeight - marginTop - toolbarHeight;
