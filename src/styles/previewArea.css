@@ -105,7 +105,7 @@
 }
 
 :deep(pre) {
-    background-color: #464545;
+    background-color: #f4f4f4;
     padding: 1rem;
     border-radius: 10px;
     overflow-x: auto;
@@ -138,7 +138,7 @@
 
 :deep(pre code) {
     padding: 0;
-    background-color: transparent;
+    background-color: #f4f4f4;
 }
 
 :deep(a) {

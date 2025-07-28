@@ -185,10 +185,7 @@ const toastMessage = ref('');
 const toastType = ref('success'); // success/error
 const onlyEdit = ref(false); // 编辑模式
 const onlyPreview = ref(false); // 预览模式
-const editAndPreview = computed(() => {
-  // 当 onlyEdit 和 onlyPreview 都为 false 时，editAndPreview 为 true，否则为 false
-  return !onlyEdit.value && !onlyPreview.value;
-});
+
 // 获取DOM引用
 const editorRef = ref<HTMLTextAreaElement>();
 const previewRef = ref<HTMLDivElement>();

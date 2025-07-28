@@ -66,39 +66,39 @@ export const pdfConfig =  `
     }
     /* 行内代码样式 */
     code {
-      background-color: #f1f3f5;
-      color: #3a7bde;
-      font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 0.8rem;
-      padding: 0.2rem 0.4rem;
-      border-radius: 5px;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.8rem;
+        padding: 0.2rem 0.4rem;
+        border-radius: 5px;
+        background-color: rgba(231, 231, 231, 0.89);
+        color: #3a7bde;
     }
     /* 代码块样式 */
     pre {
-      background-color: #transparent;
+      background-color: #f4f4f4; !important;
       padding: 1rem;
       border-radius: 6px;
       overflow-x: auto;
       margin: 1rem 0;
     }
     pre code {
-      background-color: transparent;
+      background-color: #f4f4f4 !important;
       color: #333;
       padding: 0;
       font-size: 0.9em;
       line-height: 1.5;
     }
     blockquote {
-    border-left: 6px solid #3183ee;
-    border-top: 1px solid #ddd;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
-    background-color: #f6f6f6;
-    padding: 0.5rem;
-    margin: 0 0 1rem 0;
-    color: #666;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border-left: 6px solid #3183ee;
+        border-top: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        background-color: #f6f6f6;
+        padding: 0.5rem;
+        margin: 0 0 1rem 0;
+        color: #666;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     img {
       max-width: 100%;
