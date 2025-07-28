@@ -10,6 +10,10 @@
     overflow: hidden;
 }
 
+.editor-container.only-edit, .preview-container.only-preview {
+    width: 100%;
+}
+
 
 .app-dark .editor-container,
 .app-dark .preview-container {
@@ -36,6 +40,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 /* 上传按钮 */

@@ -4,6 +4,7 @@ export const initialMarkdownContent = `# 欢迎来到素笔 Mark !
 > - 实时预览
 > - 明暗模式切换
 > - 全屏模式切换
+> - 编辑模式/预览模式切换
 > - 同步跟随滚动
 > - 导出md/pdf文件
 > - 图片本地上传

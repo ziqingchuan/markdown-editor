@@ -43,10 +43,12 @@
     <!-- 主内容区 -->
     <main class="main-content" :class="{ 'full-screen': isFullScreen }">
       <!-- 编辑器区域 -->
-      <div class="editor-container">
+      <div v-if="!onlyPreview" class="editor-container" :class="{ 'only-edit': onlyEdit }">
 
         <div class="panel-header editor-header">
-          <img class="panel-icon" src="/editor.svg" alt="编辑">
+          <div class="upload-btn" @click="onlyEdit = !onlyEdit" title="编辑模式">
+            <img class="upload-icon" src="/editor.svg" alt="编辑模式">
+          </div>
           <span>编辑区域</span>
 
           <!-- 功能按钮组 -->
@@ -78,9 +80,11 @@
       </div>
 
       <!-- 预览区域 -->
-      <div class="preview-container">
+      <div v-if="!onlyEdit" class="preview-container" :class="{ 'only-preview': onlyPreview }">
         <div class="panel-header preview-header">
-          <img class="panel-icon" src="/preview.svg" alt="预览">
+          <div class="upload-btn" @click="onlyPreview = !onlyPreview" title="预览模式">
+            <img class="upload-icon" src="/preview.svg" alt="预览模式">
+          </div>
           <span>预览区域</span>
           <!-- 功能按钮组 -->
           <div v-if="!isFullScreen" class="upload-btn" @click="isFullScreen = true" title="全屏" style="margin-left: auto">
@@ -179,6 +183,12 @@ const showDropdown = ref(false);
 const showToast = ref(false);// 弹窗状态
 const toastMessage = ref('');
 const toastType = ref('success'); // success/error
+const onlyEdit = ref(false); // 编辑模式
+const onlyPreview = ref(false); // 预览模式
+const editAndPreview = computed(() => {
+  // 当 onlyEdit 和 onlyPreview 都为 false 时，editAndPreview 为 true，否则为 false
+  return !onlyEdit.value && !onlyPreview.value;
+});
 // 获取DOM引用
 const editorRef = ref<HTMLTextAreaElement>();
 const previewRef = ref<HTMLDivElement>();
