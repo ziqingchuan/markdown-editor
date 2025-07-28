@@ -1,7 +1,7 @@
 <template>
   <div class="app-container" :class="{ 'app-dark': isDarkMode }">
     <!-- 顶部导航栏 -->
-    <header v-if="!isFullScreen" class="header">
+    <header v-show="!isFullScreen" class="header">
       <div class="header-content">
         <div class="logo">
           <i class="logo-icon">
@@ -43,7 +43,7 @@
     <!-- 主内容区 -->
     <main class="main-content" :class="{ 'full-screen': isFullScreen }">
       <!-- 编辑器区域 -->
-      <div v-if="!onlyPreview" class="editor-container" :class="{ 'only-edit': onlyEdit }">
+      <div v-show="!onlyPreview" class="editor-container" :class="{ 'only-edit': onlyEdit }">
 
         <div class="panel-header editor-header">
           <div class="upload-btn" @click="onlyEdit = !onlyEdit" title="编辑模式">
@@ -80,7 +80,7 @@
       </div>
 
       <!-- 预览区域 -->
-      <div v-if="!onlyEdit" class="preview-container" :class="{ 'only-preview': onlyPreview }">
+      <div v-show="!onlyEdit" class="preview-container" :class="{ 'only-preview': onlyPreview }">
         <div class="panel-header preview-header">
           <div class="upload-btn" @click="onlyPreview = !onlyPreview" title="预览模式">
             <img class="upload-icon" src="/preview.svg" alt="预览模式">
@@ -103,7 +103,7 @@
     </main>
 
     <!-- 页脚 -->
-    <footer v-if="!isFullScreen" class="footer">
+    <footer v-show="!isFullScreen" class="footer">
       <p>© 2025    <a target="_blank" href="https://try-catch.life/">try-catch.life</a></p>
     </footer>
 
