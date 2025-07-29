@@ -3,7 +3,7 @@ import{_ as y}from"./html2pdf-GX85U5Jj.js";import{C as D}from"./compressorjs-C46
 `).map(r=>r.trim()).filter(r=>r.length>0).join(`
 `):(console.warn("HTML 文件无有效内容"),"")},async parseMarkdown(e){return(await e.text()).split(`
 `).map(t=>t.trim()).filter(t=>t.length>0).join(`
-`)},async parsePDF(e){try{const[n]=await Promise.all([y(()=>import("./pdfjsDist-DT3itIN6.js"),[])]);n.GlobalWorkerOptions.workerSrc="pdf.worker.min.mjs";const t=await e.arrayBuffer(),m=await n.getDocument({data:t}).promise,r=m.numPages,w=[];for(let c=1;c<=r;c++){const g=await(await m.getPage(c)).getTextContent(),{items:p}=g,d=[];let s=null;const a=p.sort((i,o)=>o.transform[5]-i.transform[5]);for(const i of a){if(!i.str)continue;const o=i.transform[5],u=12*.5;s?Math.abs(s.y-o)<u?s.text+=" "+i.str:(d.push(s.text),s={text:i.str,y:o}):s={text:i.str,y:o}}s&&d.push(s.text),w.push(d.join(`
+`)},async parsePDF(e){try{const[n]=await Promise.all([y(()=>import("./pdfjsDist-C1uH3ids.js"),[])]);n.GlobalWorkerOptions.workerSrc="pdf.worker.min.mjs";const t=await e.arrayBuffer(),m=await n.getDocument({data:t}).promise,r=m.numPages,w=[];for(let c=1;c<=r;c++){const g=await(await m.getPage(c)).getTextContent(),{items:p}=g,d=[];let s=null;const a=p.sort((i,o)=>o.transform[5]-i.transform[5]);for(const i of a){if(!i.str)continue;const o=i.transform[5],u=12*.5;s?Math.abs(s.y-o)<u?s.text+=" "+i.str:(d.push(s.text),s={text:i.str,y:o}):s={text:i.str,y:o}}s&&d.push(s.text),w.push(d.join(`
 
 `)),c<r&&w.push(`
 ---
