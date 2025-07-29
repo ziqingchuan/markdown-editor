@@ -156,8 +156,8 @@
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
-// @ts-ignore
 // 1. 引入Prism核心库（替换highlight.js）
+// @ts-ignore
 import Prism from 'prismjs';
 // 3. 引入主题样式（可选其他主题）
 import 'prismjs/themes/prism-tomorrow.css';
