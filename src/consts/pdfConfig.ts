@@ -75,18 +75,13 @@ export const pdfConfig =  `
     }
     /* 代码块样式 */
     pre {
-      background-color: #f4f4f4; !important;
       padding: 1rem;
       border-radius: 6px;
       overflow-x: auto;
       margin: 1rem 0;
     }
     pre code {
-      background-color: #f4f4f4 !important;
-      color: #333;
       padding: 0;
-      font-size: 0.9em;
-      line-height: 1.5;
     }
     blockquote {
         border-left: 6px solid #3183ee;

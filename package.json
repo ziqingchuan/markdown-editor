@@ -11,15 +11,15 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "compressorjs": "^1.2.1",
     "dompurify": "^3.2.6",
     "gh-pages": "^6.3.0",
-    "mammoth": "^1.9.0",
-    "pdfjs-dist": "^5.1.91",
-    "highlight.js": "^11.11.1",
     "html2pdf.js": "^0.10.3",
+    "mammoth": "^1.9.0",
     "marked": "^16.1.1",
-    "vue": "^3.5.13",
-    "compressorjs": "^1.2.1"
+    "pdfjs-dist": "^5.1.91",
+    "prismjs": "^1.30.0",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
@@ -27,6 +27,7 @@
     "gh-pages": "^6.3.0",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
+    "vite-plugin-compression": "^0.5.1",
     "vue-tsc": "^2.2.8"
   }
 }

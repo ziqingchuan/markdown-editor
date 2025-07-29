@@ -17,10 +17,4 @@ export const initialMarkdownContent = `# 欢迎来到素笔 Mark !
 [欢迎来我的博客看看：try-catch.life](https://try-catch.life/)
 
 主要记录前端面试知识点，以及一些自己做的小demo
-
-\`\`\`javascript
-function greet() {
-  console.log("未来，你好！👋!");
-}
-\`\`\`
 `;

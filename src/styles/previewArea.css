@@ -18,6 +18,11 @@
 }
 
 /* 预览区域Markdown样式 */
+
+:deep(strong) {
+    font-weight: bold;
+}
+
 :deep(h1), :deep(h2), :deep(h3) {
     margin: 1.5rem 0 1rem;
     font-weight: 600;

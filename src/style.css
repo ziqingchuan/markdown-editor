@@ -1,9 +1,7 @@
 /*一些公用的css*/
 
 :root {
-  font-family: '华文楷体', cursive;
   line-height: 1.5;
-  font-weight: 400;
 }
 
 html, body {

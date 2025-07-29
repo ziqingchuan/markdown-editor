@@ -1,5 +1,6 @@
 import {pdfConfig} from "../consts/pdfConfig.ts";
-import hljs from "highlight.js";
+// @ts-ignore
+import Prism from 'prismjs';
 
 export const markdownHandler = (markdown: string) => {
     const blob = new Blob([markdown], { type: 'text/markdown' });
@@ -18,14 +19,14 @@ export const pdfHandler = (renderedMarkdown: any) => {
     // 1. 复制预览区内容
     tempElement.innerHTML = renderedMarkdown.value;
 
-    // 2. 手动注入所需样式（关键步骤）
+    // 2. 手动注入所需样式
     const style = document.createElement('style');
     style.textContent = pdfConfig;
     tempElement.appendChild(style);
 
     // 3. 代码高亮
     tempElement.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightElement(<HTMLElement>block);
+        Prism.highlightElement(block as HTMLElement);
     });
 
     // 4. 设置临时元素基础样式（移除强制白色背景的冲突代码）

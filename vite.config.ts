@@ -1,9 +1,15 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
+import compression from 'vite-plugin-compression'; // 新增：压缩插件
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+      vue(),
+      compression({
+        algorithm: 'gzip',
+        threshold: 10240, // 大于10KB的文件才压缩
+      })
+  ],
   base: '/markdown-editor/',
   optimizeDeps: {
     include: ['mammoth', 'pdfjs-dist'],
@@ -15,12 +21,12 @@ export default defineConfig({
         manualChunks: {
           // 将大型库单独打包
           html2pdf: ['html2pdf.js'],
-          highlight: ['highlight.js'],
           marked: ['marked'],
           dompurify: ['dompurify'],
           compressorjs: ['compressorjs'],
           mammoth: ['mammoth'],
-          pdfjsDist: ['pdfjs-dist']
+          pdfjsDist: ['pdfjs-dist'],
+          prismjs: ['prismjs'],
         }
       }
     },
