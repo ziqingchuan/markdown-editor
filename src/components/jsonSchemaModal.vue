@@ -1,5 +1,4 @@
 <template>
-  <!-- 模板部分基本不变，主要修改绑定逻辑 -->
   <div class="json-modal-mask" v-if="visible" @click="handleMaskClick">
     <div class="json-modal" :class="{ 'app-dark': isDarkMode }" @click.stop>
       <div class="modal-header">
@@ -14,97 +13,15 @@
         </div>
 
         <div v-if="schema.properties" class="schema-tree">
-          <div class="schema-root">
-            <div class="property-header">
-              <span class="property-name">根对象</span>
-              <span class="property-type">object</span>
-            </div>
-
-            <div class="properties-list">
-              <!-- 遍历改为使用 key 作为唯一标识 -->
-              <div
-                  v-for="(prop) in schema.properties"
-                  :key="prop.key"
-                  class="property-item"
-              >
-                <div class="property-controls">
-                  <input
-                      type="text"
-                      v-model="prop.name"
-                      class="property-input"
-                      placeholder="属性名"
-                  >
-
-                  <select
-                      v-model="prop.type"
-                      class="property-select"
-                      @change="handleTypeChange(prop)"
-                  >
-                    <option value="string">string</option>
-                    <option value="number">number</option>
-                    <option value="boolean">boolean</option>
-                    <option value="object">object</option>
-                    <option value="array">array</option>
-                  </select>
-
-                  <label class="checkbox-label">
-                    必选字段
-                    <input
-                        type="checkbox"
-                        v-model="prop.required"
-                        class="property-checkbox"
-                        @change="handleRequiredChange(prop)"
-                    >
-                  </label>
-
-                  <button
-                      class="remove-btn"
-                      @click="removeProperty(prop.key)"
-                  >
-                    删除
-                  </button>
-                </div>
-
-                <!-- 嵌套对象支持 -->
-                <div v-if="prop.type === 'object'" class="nested-object">
-                  <button
-                      class="nested-add-btn"
-                      @click="addNestedProperty(prop)"
-                  >
-                    + 添加子属性
-                  </button>
-                  <div
-                      v-if="prop.properties && prop.properties.length > 0"
-                      v-for="(nestedProp) in prop.properties"
-                      :key="nestedProp.key"
-                      class="nested-property-item"
-                  >
-                    <input
-                        type="text"
-                        v-model="nestedProp.name"
-                        class="nested-property-input"
-                        placeholder="子属性名"
-                    >
-                    <select
-                        v-model="nestedProp.type"
-                        class="nested-property-select"
-                    >
-                      <option value="string">string</option>
-                      <option value="number">number</option>
-                      <option value="boolean">boolean</option>
-                      <option value="array">array</option>
-                    </select>
-                    <button
-                        class="nested-remove-btn"
-                        @click="removeNestedProperty(prop, nestedProp.key)"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <SchemaNode
+              v-for="prop in schema.properties"
+              :key="prop.key"
+              :node="prop"
+              :depth="0"
+              @add-child="addNestedProperty"
+              @remove="removeProperty"
+              @type-change="handleTypeChange"
+          />
         </div>
 
         <div v-else class="empty-state">
@@ -132,41 +49,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, watch } from 'vue';
-import {keyGenerator} from "../utils/keyGenerator.ts";
+import { ref, computed, watch } from 'vue';
+import SchemaNode from './SchemaNode.vue';
+import { keyGenerator } from '../utils/keyGenerator';
 
-// 定义属性结构类型 - 新增 key 字段（固定不变）
 interface SchemaProperty {
-  key: string; // 内部唯一标识，创建后不变
-  name: string; // 显示名称，可修改
+  key: string;
+  name: string;
   type: 'string' | 'number' | 'boolean' | 'object' | 'array';
   required: boolean;
-  properties?: SchemaProperty[]; // 嵌套属性
-  nestedRequired?: string[]; // 嵌套属性的 required 数组（存储 key）
+  properties?: SchemaProperty[];
 }
 
-// 定义Schema结构类型 - properties 改为数组（方便遍历）
 interface JsonSchema {
   type: 'object';
-  properties?: SchemaProperty[]; // 改为数组，用 key 标识
-  required?: string[]; // 存储 key 而非 name
+  properties?: SchemaProperty[];
+  required?: string[];
 }
 
-// 接收父组件参数
 const props = defineProps<{
   visible: boolean;
   isDarkMode: boolean;
   defaultSchema?: JsonSchema;
 }>();
 
-// 内部状态
+const emit = defineEmits(['close', 'confirm', 'error']);
+
 const schema = ref<JsonSchema>({
   type: 'object',
   properties: undefined,
   required: []
 });
 
-// 初始化根对象
 const addRootObject = () => {
   if (!schema.value.properties) {
     schema.value.properties = [];
@@ -174,163 +88,123 @@ const addRootObject = () => {
   }
 };
 
-// 添加属性 - 使用 uuid 作为 key
 const addProperty = () => {
   if (!schema.value.properties) return;
 
-  const newKey = keyGenerator(); // 生成唯一 key
-  const newProp = {
+  const newKey = keyGenerator();
+  const newProp: SchemaProperty = {
     key: newKey,
     name: `prop${schema.value.properties.length + 1}`,
     type: 'string',
     required: true
   };
 
-  schema.value.properties.push(newProp as SchemaProperty);
-
-  // required 数组存储 key
-  if (!schema.value.required?.includes(newKey)) {
-    schema.value.required?.push(newKey);
-  }
+  schema.value.properties.push(newProp);
+  updateRequiredArray(newKey, true);
 };
 
-// 处理类型变更
-const handleTypeChange = (prop: SchemaProperty) => {
-  if (prop.type === 'object' && !prop.properties) {
-    prop.properties = [];
-  }
-};
-
-// 处理必填状态变更 - 基于 key 操作 required 数组
-const handleRequiredChange = (prop: SchemaProperty) => {
-  if (!schema.value.required) return;
-
-  if (prop.required && !schema.value.required.includes(prop.key)) {
-    schema.value.required.push(prop.key);
-  } else if (!prop.required && schema.value.required.includes(prop.key)) {
-    schema.value.required = schema.value.required.filter(key => key !== prop.key);
-  }
-};
-
-// 添加嵌套属性
 const addNestedProperty = (parentProp: SchemaProperty) => {
   if (!parentProp.properties) {
     parentProp.properties = [];
   }
 
   const newKey = keyGenerator();
-  parentProp.properties.push({
+  const newProp: SchemaProperty = {
     key: newKey,
     name: `subProp${parentProp.properties.length + 1}`,
     type: 'string',
     required: true
-  });
+  };
 
-  // 更新嵌套属性的 required 数组
-  if (!parentProp.nestedRequired) {
-    parentProp.nestedRequired = [];
-  }
-  parentProp.nestedRequired.push(newKey);
+  parentProp.properties.push(newProp);
 };
 
-// 删除嵌套属性
-const removeNestedProperty = (parentProp: SchemaProperty, nestedKey: string) => {
-  if (!parentProp.properties) return;
-
-  // 删除属性
-  parentProp.properties = parentProp.properties.filter(prop => prop.key !== nestedKey);
-
-  // 更新嵌套 required 数组
-  if (parentProp.nestedRequired) {
-    parentProp.nestedRequired = parentProp.nestedRequired.filter(key => key !== nestedKey);
-  }
-};
-
-// 删除属性
 const removeProperty = (key: string) => {
   if (!schema.value.properties) return;
 
-  // 删除属性
-  schema.value.properties = schema.value.properties.filter(prop => prop.key !== key);
+  const removeRecursive = (props: SchemaProperty[]): SchemaProperty[] => {
+    return props.filter(prop => {
+      if (prop.key === key) return false;
+      if (prop.properties) {
+        prop.properties = removeRecursive(prop.properties);
+      }
+      return true;
+    });
+  };
 
-  // 更新 required 数组
-  schema.value.required = schema.value.required?.filter(propKey => propKey !== key);
+  schema.value.properties = removeRecursive(schema.value.properties);
+  updateRequiredArray(key, false);
 };
 
-// 格式化Schema用于预览 - 最终输出使用 name
+const handleTypeChange = (prop: SchemaProperty) => {
+  if (prop.type === 'object' && !prop.properties) {
+    prop.properties = [];
+  }
+};
+
+const updateRequiredArray = (key: string, shouldAdd: boolean) => {
+  if (!schema.value.required) return;
+
+  if (shouldAdd && !schema.value.required.includes(key)) {
+    schema.value.required.push(key);
+  } else if (!shouldAdd) {
+    schema.value.required = schema.value.required.filter(k => k !== key);
+  }
+};
+
 const formattedSchema = computed(() => {
   if (!schema.value.properties) return '{}';
 
-  const finalSchema = {
-    type: 'object',
-    properties: {} as Record<string, any>,
-    required: schema.value.required?.map(key => {
-      // 将 required 中的 key 映射为对应的 name
-      const prop = schema.value.properties?.find(p => p.key === key);
-      return prop?.name || key;
-    })
+  const formatProperties = (props: SchemaProperty[]): Record<string, any> => {
+    return props.reduce((acc, prop) => {
+      acc[prop.name] = { type: prop.type };
+
+      if (prop.type === 'object' && prop.properties) {
+        acc[prop.name].properties = formatProperties(prop.properties);
+
+        if (prop.properties.some(p => p.required)) {
+          acc[prop.name].required = prop.properties
+              .filter(p => p.required)
+              .map(p => p.name);
+        }
+      }
+
+      return acc;
+    }, {} as Record<string, any>);
   };
 
-  // 处理顶级属性
-  schema.value.properties.forEach(prop => {
-    finalSchema.properties[prop.name] = {
-      type: prop.type
-    };
+  const result = {
+    type: 'object',
+    properties: formatProperties(schema.value.properties),
+    required: schema.value.properties
+        .filter(prop => prop.required)
+        .map(prop => prop.name)
+  };
 
-    // 处理嵌套对象
-    if (prop.type === 'object' && prop.properties) {
-      finalSchema.properties[prop.name].properties = {};
-      prop.properties.forEach(nestedProp => {
-        finalSchema.properties[prop.name].properties![nestedProp.name] = {
-          type: nestedProp.type
-        };
-      });
-
-      // 处理嵌套对象的 required（映射为 name）
-      if (prop.nestedRequired && prop.nestedRequired.length > 0) {
-        finalSchema.properties[prop.name].required = prop.nestedRequired.map(key => {
-          const nestedProp = prop.properties?.find(p => p.key === key);
-          return nestedProp?.name || key;
-        });
-      }
-    }
-  });
-
-  return JSON.stringify(finalSchema, null, 2);
+  return JSON.stringify(result, null, 2);
 });
 
-// 向父组件传递事件
-const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'confirm', schema: string): void;
-  (e: 'error', message: string): void;
-}>();
-
-// 处理确认
 const handleConfirm = () => {
   if (!schema.value.properties) {
     emit('error', '请先配置JSON Schema');
     return;
   }
-  const schemaStr = formattedSchema.value;
-  const codeBlock = `\n\`\`\`json\n${schemaStr}\n\`\`\``;
-  emit('confirm', codeBlock);
+  const markdownCodeBlock = `\n\`\`\`js\n${formattedSchema.value}\n\`\`\``;
+
+  emit('confirm', markdownCodeBlock);
 };
 
-// 处理关闭
 const handleClose = () => {
   emit('close');
 };
 
-// 点击遮罩层关闭
 const handleMaskClick = () => {
   emit('close');
 };
 
-// 监听可见性变化
 watch(() => props.visible, (newVal) => {
   if (newVal && props.defaultSchema) {
-    schema.value = { ...props.defaultSchema };
+    schema.value = JSON.parse(JSON.stringify(props.defaultSchema));
   } else if (!newVal) {
     schema.value = {
       type: 'object',
