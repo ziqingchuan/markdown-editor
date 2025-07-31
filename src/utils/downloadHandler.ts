@@ -14,6 +14,18 @@ export const markdownHandler = (markdown: string) => {
     URL.revokeObjectURL(url);
 }
 
+export const htmlHandler = (html: string) => {
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '素笔Mark导出html.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 export const pdfHandler = (renderedMarkdown: any) => {
     const tempElement = document.createElement('div');
     // 1. 复制预览区内容
