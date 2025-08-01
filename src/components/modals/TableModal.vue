@@ -89,5 +89,5 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped>
-@import '../styles/tableModal.css';
+@import '../../styles/tableModal.css';
 </style>

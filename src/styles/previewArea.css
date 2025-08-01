@@ -236,3 +236,8 @@
         overflow-x: auto;
     }
 }
+
+/* 公式渲染只渲染他的html */
+:deep(.katex-html) {
+    display: none;
+}

@@ -97,5 +97,5 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped>
-@import '../styles/codeBlockModal.css';
+@import '../../styles/codeBlockModal.css';
 </style>

@@ -51,7 +51,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import SchemaNode from './SchemaNode.vue';
-import { keyGenerator } from '../utils/keyGenerator';
+import { keyGenerator } from '../../utils/keyGenerator.ts';
 
 interface SchemaProperty {
   key: string;
@@ -216,5 +216,5 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped>
-@import '../styles/jsonSchemaModal.css';
+@import '../../styles/jsonSchemaModal.css';
 </style>

@@ -24,6 +24,9 @@ export const textHandler = (type: ContentType, selectedText: string) => {
         case 'list':
             selectedText = `- ${selectedText}`
             break;
+        case 'math':
+            selectedText = ` $${selectedText}$`;
+            break;
     }
     return selectedText;
 }

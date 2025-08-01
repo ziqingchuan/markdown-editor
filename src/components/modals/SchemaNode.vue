@@ -99,5 +99,5 @@ const handleChildTypeChange = (node: any) => {
 </script>
 
 <style scoped>
-@import '../styles/jsonSchemaModal.css';
+@import '../../styles/jsonSchemaModal.css';
 </style>

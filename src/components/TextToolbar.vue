@@ -7,27 +7,72 @@
       :class="{ 'app-dark': isDarkMode }"
   >
     <!-- 工具栏按钮 -->
-    <button class="toolbar-btn" @click="onFormat('bold')" title="加粗">
-      <img src="../assets/bold.svg" alt="加粗">
-    </button>
-    <button class="toolbar-btn" @click="onFormat('italic')" title="斜体">
-      <img src="../assets/italic.svg" alt="斜体">
-    </button>
-    <button class="toolbar-btn" @click="onFormat('underline')" title="下划线">
-      <img src="../assets/underline.svg" alt="下划线">
-    </button>
-    <button class="toolbar-btn" @click="onFormat('link')" title="链接">
-      <img src="../assets/link.svg" alt="链接">
-    </button>
-    <button class="toolbar-btn" @click="onFormat('code')" title="代码">
-      <img src="../assets/code.svg" alt="代码">
-    </button>
-    <button class="toolbar-btn" @click="onFormat('quote')" title="引用">
-      <img src="../assets/quote.svg" alt="引用">
-    </button>
-    <button class="toolbar-btn" @click="onFormat('list')" title="列表">
-      <img src="../assets/list.svg" alt="列表">
-    </button>
+    <Tooltip
+        content="加粗"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('bold')">
+        <img src="../assets/bold.svg" alt="加粗">
+      </button>
+    </Tooltip>
+
+    <Tooltip
+        content="斜体"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('italic')">
+        <img src="../assets/italic.svg" alt="斜体">
+      </button>
+    </Tooltip>
+
+    <Tooltip
+        content="下划线"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('underline')">
+        <img src="../assets/underline.svg" alt="下划线">
+      </button>
+    </Tooltip>
+    <Tooltip
+        content="链接"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('link')">
+        <img src="../assets/link.svg" alt="链接">
+      </button>
+    </Tooltip>
+    <Tooltip
+        content="行内公式"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('math')">
+        <img src="../assets/math.svg" alt="链接">
+      </button>
+    </Tooltip>
+    <Tooltip
+        content="行内代码"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('code')">
+        <img src="../assets/code.svg" alt="代码">
+      </button>
+    </Tooltip>
+    <Tooltip
+        content="引用块"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('quote')">
+        <img src="../assets/quote.svg" alt="引用">
+      </button>
+    </Tooltip>
+    <Tooltip
+        content="无序列表"
+        :is-dark-mode="isDarkMode"
+    >
+      <button class="toolbar-btn" @click="onFormat('list')">
+        <img src="../assets/list.svg" alt="列表">
+      </button>
+    </Tooltip>
   </div>
 </template>
 
@@ -35,7 +80,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import type { ContentType } from '../types/contentType.ts';
 import { textHandler } from '../utils/textHandler.ts';
-
+import Tooltip from "../components/Tooltip.vue";
 // 接收父组件传递的编辑器引用和初始位置
 const props = defineProps<{
   editorRef: HTMLTextAreaElement | undefined; // 编辑器DOM引用

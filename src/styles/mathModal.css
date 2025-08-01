@@ -1,0 +1,272 @@
+/* 主要布局调整 */
+.input-preview-container {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    height: 180px; /* 固定高度确保两侧对齐 */
+}
+
+.input-section, .preview-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+}
+
+.input-section textarea {
+    padding: 10px;
+    line-height: 1.5;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/Opera */
+    }
+}
+
+.preview-section {
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    &::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/Opera */
+    }
+}
+
+/* 公式工具栏样式 */
+.formula-toolbar {
+    margin-bottom: 0; /* 移除底部间距 */
+    padding: 12px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    max-height: 220px; /* 适当增加高度 */
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.app-dark .formula-toolbar {
+    background-color: #333;
+    border-color: #555;
+}
+
+/* 输入框和预览区样式调整 */
+.code-preview {
+    width: 100%;
+    flex: 1; /* 占满剩余高度 */
+    box-sizing: border-box;
+}
+
+.preview-container {
+    width: 100%;
+    flex: 1; /* 占满剩余高度 */
+    min-height: auto; /* 取消最小高度限制 */
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.math-preview {
+    min-height: auto;
+    font-size: 1.2em; /* 适当放大预览字体 */
+}
+
+/* 保持原有样式 */
+.math-modal-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.math-modal {
+    width: 900px; /* 加宽弹窗以适应左右布局 */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.math-modal.app-dark {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.modal-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.math-modal.app-dark .modal-header {
+    border-bottom-color: #444;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.math-modal.app-dark .modal-close:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+.modal-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.math-modal.app-dark .modal-footer {
+    border-top-color: #444;
+}
+
+.cancel-btn, .confirm-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+}
+
+.cancel-btn {
+    background-color: #f5f5f5;
+}
+
+.math-modal.app-dark .cancel-btn {
+    background-color: #444;
+    border-color: #555;
+    color: #fff;
+}
+
+.cancel-btn:hover {
+    background-color: #c4c4c4;
+}
+
+.math-modal.app-dark .cancel-btn:hover {
+    background-color: #7e7e7e;
+}
+
+.confirm-btn {
+    background-color: #4e8aee;
+    color: white;
+    border-color: #3a6fdc;
+}
+
+.confirm-btn:hover {
+    background-color: #2855b3;
+}
+
+.toolbar-section {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #999999;
+}
+
+.toolbar-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.toolbar-section h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.math-modal.app-dark .toolbar-section h4 {
+    color: #bbb;
+}
+
+.toolbar-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.toolbar-buttons button {
+    padding: 4px 8px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.math-modal.app-dark .toolbar-buttons button {
+    background-color: #444;
+    border-color: #666;
+    color: #e0e0e0;
+}
+
+.toolbar-buttons button:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+.math-modal.app-dark .toolbar-buttons button:hover {
+    background-color: #555;
+    border-color: #777;
+}
+
+.preview-placeholder {
+    color: #999;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.math-modal.app-dark,
+.math-modal.app-dark .code-preview {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+.math-modal.app-dark .code-preview::placeholder {
+    color: #999;
+}
+
+.math-modal.app-dark .preview-container {
+    background-color: #333;
+    border-color: #555;
+    color: #e0e0e0;
+}
+
+.math-modal.app-dark .preview-placeholder {
+    color: #666;
+}
+
+.preview-container:focus-within {
+    outline: none;
+    border-color: #409eff;
+}

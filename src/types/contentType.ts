@@ -1,1 +1,1 @@
-export type ContentType = 'bold' | 'italic' | 'underline' | 'link' | 'code' | 'quote' | 'list';
+export type ContentType = 'bold' | 'italic' | 'underline' | 'link' | 'code' | 'quote' | 'list' | 'math';

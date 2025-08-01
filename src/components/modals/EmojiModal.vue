@@ -97,7 +97,7 @@ const loadEmojiData = async () => {
   try {
     isLoading.value = true;
     // 动态导入emoji数据，只有在需要时才加载
-    const { emojis } = await import('../consts/emojiData.ts');
+    const { emojis } = await import('../../consts/emojiData.ts');
     emojiData.value = emojis;
     hasLoaded = true; // 标记为已加载
   } catch (error) {
@@ -137,7 +137,7 @@ watch(() => props.visible, (newVal) => {
 </script>
 
 <style scoped>
-@import '../styles/emojiModal.css';
+@import '../../styles/emojiModal.css';
 
 /* 加载状态样式 */
 .emoji-loading {
