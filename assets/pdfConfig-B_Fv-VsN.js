@@ -103,6 +103,10 @@ const o=`
       color: #1a73e8;
       text-decoration: none;
     }
+    /* 公式渲染只渲染他的html */
+    .katex-html {
+        display: none;
+    }
     /* 基础样式 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
