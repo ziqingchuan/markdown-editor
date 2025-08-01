@@ -107,6 +107,9 @@ export const pdfConfig =  `
     .katex-html {
         display: none;
     }
+    .katex-mathml math {
+        padding: 8px;
+    }
     /* 基础样式 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

@@ -241,3 +241,6 @@
 :deep(.katex-html) {
     display: none;
 }
+:deep(.katex-mathml math) {
+    padding: 8px;
+}
