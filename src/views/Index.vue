@@ -238,7 +238,7 @@ import Prism from 'prismjs';
 // 3. 引入主题样式（可选其他主题）
 import 'prismjs/themes/prism-tomorrow.css';
 import {syncScroll} from "../utils/scrollHandler.ts";
-import {initialMarkdownContent} from "../consts/markdownContent.ts";
+// import {initialMarkdownContent} from "../consts/markdownContent.ts";
 import { keyboardHandler } from "../utils/keyboardHandler.ts";
 import { defineAsyncComponent } from 'vue';
 import Tooltip from "../components/Tooltip.vue";
@@ -312,7 +312,7 @@ marked.setOptions({
   gfm: true // 支持GFM语法
 });
 // 初始化Markdown内容
-const markdownContent = ref(initialMarkdownContent);
+const markdownContent = ref('');
 
 // 渲染后的HTML
 const renderedMarkdown = computed(() => {
