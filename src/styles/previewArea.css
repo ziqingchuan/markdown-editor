@@ -237,10 +237,35 @@
     }
 }
 
-/* 公式渲染只渲染他的html */
+/* 公式渲染 - 强化隐藏逻辑，适配所有设备 */
 :deep(.katex-html) {
-    display: none;
+    display: none !important; /* 提高优先级 */
 }
+
+:deep(.katex-mathml) {
+    display: block !important; /* 确保MathML显示 */
+}
+
 :deep(.katex-mathml math) {
     padding: 8px;
+    width: 100%; /* 适应移动端宽度 */
+}
+
+/* 针对移动端的额外适配 */
+@media (max-width: 768px) {
+    :deep(.katex-html) {
+        display: none !important; /* 提高优先级 */
+    }
+    :deep(.katex-mathml) {
+        overflow-x: auto; /* 防止公式溢出屏幕 */
+    }
+
+    :deep(.katex-mathml math) {
+        padding: 4px 0; /* 减少移动端内边距 */
+    }
+}
+
+/* 确保暗黑模式下样式一致 */
+.app-dark :deep(.katex-html) {
+    display: none !important;
 }
