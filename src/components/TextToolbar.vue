@@ -4,6 +4,7 @@
       ref="toolbarRef"
       :style="{ left: toolbarLeft + 'px', top: toolbarTop + 'px' }"
       @mousedown="startDrag"
+      @touchstart.passive="startDrag"
       :class="{ 'app-dark': isDarkMode }"
   >
     <!-- 工具栏按钮 -->
@@ -81,66 +82,79 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import type { ContentType } from '../types/contentType.ts';
 import { textHandler } from '../utils/textHandler.ts';
 import Tooltip from "../components/Tooltip.vue";
-// 接收父组件传递的编辑器引用和初始位置
+
 const props = defineProps<{
-  editorRef: HTMLTextAreaElement | undefined; // 编辑器DOM引用
+  editorRef: HTMLTextAreaElement | undefined;
   isDarkMode: boolean;
-  initialLeft?: number; // 初始左侧定位
-  initialTop?: number; // 初始顶部定位
+  initialLeft?: number;
+  initialTop?: number;
 }>();
 
-// 工具栏DOM引用
+const emit = defineEmits<{
+  (e: 'format', content: string): void;
+  (e: 'positionChange', left: number, top: number): void;
+}>();
+
+// DOM 引用和状态
 const toolbarRef = ref<HTMLDivElement>();
-// 工具栏定位状态
 const toolbarLeft = ref(props.initialLeft || 0);
 const toolbarTop = ref(props.initialTop || 0);
 const isDragging = ref(false);
 const startX = ref(0);
 const startY = ref(0);
 
-// 向父组件传递事件
-const emit = defineEmits<{
-  // 传递格式化后的文本给父组件
-  (e: 'format', content: string): void;
-  // 传递工具栏位置变化（可选，用于父组件保存位置）
-  (e: 'positionChange', left: number, top: number): void;
-}>();
-
-// 格式化文本（调用工具函数处理后传递给父组件）
+// 格式化文本
 const onFormat = (type: ContentType) => {
   if (!props.editorRef) return;
   const selectedText = window.getSelection()?.toString() || '';
   const formattedText = textHandler(type, selectedText);
-  emit('format', formattedText); // 传递格式化后的文本
+  emit('format', formattedText);
 };
 
-// 拖拽相关方法
-const startDrag = (e: MouseEvent) => {
+// 拖拽逻辑（兼容鼠标和触摸事件）
+const startDrag = (e: MouseEvent | TouchEvent) => {
   if (!toolbarRef.value) return;
+
+  // 统一获取坐标
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
   const target = e.target as HTMLElement;
-  if (e.target === toolbarRef.value || target.classList.contains('toolbar-btn')) {
+  if (target === toolbarRef.value || target.classList.contains('toolbar-btn')) {
     isDragging.value = true;
-    startX.value = e.clientX - toolbarLeft.value;
-    startY.value = e.clientY - toolbarTop.value;
+    startX.value = clientX - toolbarLeft.value;
+    startY.value = clientY - toolbarTop.value;
+
+    // 监听所有事件
     document.addEventListener('mousemove', handleDrag);
+    document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
   }
 };
 
-const handleDrag = (e: MouseEvent) => {
+const handleDrag = (e: MouseEvent | TouchEvent) => {
   if (!isDragging.value || !toolbarRef.value) return;
+
+  // 阻止触摸默认行为（避免页面滚动）
+  if ('touches' in e) e.preventDefault();
+
+  // 统一获取坐标
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+  // 边界计算
   const toolbarWidth = toolbarRef.value.offsetWidth;
   const toolbarHeight = toolbarRef.value.offsetHeight;
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  // 计算新位置并限制边界
-  let newLeft = e.clientX - startX.value;
-  let newTop = e.clientY - startY.value;
+  let newLeft = clientX - startX.value;
+  let newTop = clientY - startY.value;
   newLeft = Math.max(0, Math.min(newLeft, screenWidth - toolbarWidth));
-  newTop = Math.max(0, Math.min(newTop, screenHeight - toolbarHeight - 10));
+  newTop = Math.max(0, Math.min(newTop, screenHeight - toolbarHeight));
 
-  // 更新位置并通知父组件
+  // 更新位置
   toolbarLeft.value = newLeft;
   toolbarTop.value = newTop;
   emit('positionChange', newLeft, newTop);
@@ -149,47 +163,42 @@ const handleDrag = (e: MouseEvent) => {
 const stopDrag = () => {
   if (isDragging.value) {
     isDragging.value = false;
+    // 移除所有事件监听
     document.removeEventListener('mousemove', handleDrag);
+    document.removeEventListener('touchmove', handleDrag);
     document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchend', stopDrag);
   }
 };
 
-// 初始化工具栏位置
+// 初始化位置
 const initToolbarPosition = () => {
   if (!toolbarRef.value) return;
   const toolbarWidth = toolbarRef.value.offsetWidth;
   const toolbarHeight = toolbarRef.value.offsetHeight;
-  const marginLeft = 10;
-  const marginTop = 30;
+  const margin = 10;
 
-  const maxLeft = window.innerWidth - marginLeft - toolbarWidth;
-  const maxTop = window.innerHeight - marginTop - toolbarHeight;
-
-  toolbarLeft.value = Math.max(marginLeft, maxLeft);
-  toolbarTop.value = Math.max(marginTop, maxTop);
+  toolbarLeft.value = Math.max(margin, window.innerWidth - toolbarWidth - margin);
+  toolbarTop.value = Math.max(margin, window.innerHeight - toolbarHeight - margin * 3);
   emit('positionChange', toolbarLeft.value, toolbarTop.value);
 };
 
-// 监听窗口大小变化
+// 响应式调整
 const handleResize = () => {
-  if (!isDragging.value) {
-    initToolbarPosition();
-  }
+  if (!isDragging.value) initToolbarPosition();
 };
 
-// 组件生命周期
+// 生命周期
 onMounted(() => {
-  nextTick(initToolbarPosition); // 确保DOM渲染后初始化位置
+  nextTick(initToolbarPosition);
   window.addEventListener('resize', handleResize);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize);
-  document.removeEventListener('mousemove', handleDrag);
-  document.removeEventListener('mouseup', stopDrag);
+  stopDrag(); // 确保清除所有事件
 });
 </script>
-
 <style scoped>
 @import '../styles/textToolbar.css';
 </style>
