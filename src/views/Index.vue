@@ -455,14 +455,14 @@ const downloadPdf = async () => {
     const { pdfHandler } = await import("../utils/downloadHandler.ts");
 
     tempElement = pdfHandler(renderedMarkdown);
-    document.body.appendChild(tempElement);
+    // document.body.appendChild(tempElement);
     const {pdfOptions} = await import("../consts/pdfConfig.ts");
     await html2pdf().from(tempElement).set(pdfOptions).save();
     showCustomToast('PDF文件下载成功');
   } catch (error: any) {
     showCustomToast('PDF生成失败：' + error.message, 'error');
   } finally {
-    document.body.removeChild(tempElement);
+    // document.body.removeChild(tempElement);
     isLoading.value = false;
   }
 };
