@@ -547,9 +547,7 @@ const loadFromLocalStorage = (): string => {
 
 // 监听内容变化并自动保存
 watch(markdownContent, (newContent) => {
-  if (newContent.trim()) {
     saveToLocalStorage(newContent);
-  }
 });
 
 onMounted(() => {
