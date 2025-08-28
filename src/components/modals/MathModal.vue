@@ -190,7 +190,7 @@
       </div>
       <div class="modal-footer">
         <button class="cancel-btn" @click="handleClose">取消</button>
-        <button class="confirm-btn" @click="handleConfirm">确认插入</button>
+        <button class="confirm-btn" :disabled="isBadKatex" @click="handleConfirm">确认插入</button>
       </div>
     </div>
   </div>
@@ -211,7 +211,7 @@ const props = defineProps<{
 marked.use(markedKatex({
   // @ts-ignore
   katexOptions: {
-    throwOnError: false,
+    throwOnError: true,
     displayMode: false,
     strict: 'ignore',
     trust: true
@@ -220,10 +220,20 @@ marked.use(markedKatex({
 
 const formulaContent = ref(props.defaultContent || '');
 const formulaInput = ref<HTMLTextAreaElement>();
+const isBadKatex = ref(false);
 
 const renderedMarkdown = computed(() => {
-  // @ts-ignore
-  return DOMPurify.sanitize(marked.parse('$$' + formulaContent.value + '$$'));
+  let markdown;
+  try{
+    isBadKatex.value = false;
+    // @ts-ignore
+    markdown = DOMPurify.sanitize(marked.parse('$$' + formulaContent.value + '$$'));
+  } catch(e: any){
+    markdown = '公式语法错误，请检查公式内容！';
+    console.error(e.message);
+    isBadKatex.value = true;
+  }
+  return markdown;
 });
 
 const emit = defineEmits<{
@@ -262,6 +272,7 @@ const handleConfirm = () => {
   }
 
   const mathContent = `\n$$\n ${formulaContent.value}\n$$\n`;
+  console.log(mathContent);
   emit('confirm', mathContent);
 };
 

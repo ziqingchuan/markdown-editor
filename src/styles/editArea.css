@@ -81,7 +81,6 @@
 /* 编辑器文本区域 */
 .editor-textarea {
     flex: 1;
-    width: 100%;
     padding: 15px;
     border: none;
     resize: none;
@@ -91,4 +90,6 @@
     font-size: 14px;
     background-color: transparent;
     color: inherit;
+    scrollbar-width: thin; /* Firefox：设置滚动条宽度（thin/auto/none） */
+    scrollbar-color: rgba(209, 209, 209, 0.5) transparent; /* Firefox：滚动条滑块颜色 + 轨道颜色 */
 }

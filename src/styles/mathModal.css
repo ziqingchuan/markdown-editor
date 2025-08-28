@@ -182,6 +182,21 @@
     background-color: #2855b3;
 }
 
+/* 确认按钮悬停状态 */
+.confirm-btn:hover:not(:disabled) {
+    background-color: #40a9ff;
+    transform: translateY(-1px);
+}
+
+/* 禁用状态样式 */
+.confirm-btn:disabled {
+    background-color: #d9d9d9;
+    color: rgba(0, 0, 0, 0.25);
+    cursor: not-allowed;
+    transform: none;
+    border-color: #d9d9d9;
+}
+
 .toolbar-section {
     margin-bottom: 12px;
     padding-bottom: 8px;
