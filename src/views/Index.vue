@@ -233,6 +233,7 @@ import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
+import { debounce } from 'lodash-es';
 // 1. 引入Prism核心库（替换highlight.js）
 // @ts-ignore
 import Prism from 'prismjs';
@@ -289,7 +290,8 @@ const showEmojiModal =  ref(false);
 const showJsonModal = ref(false);
 const isFullScreen = ref(false); // 全屏状态
 const isHtmlMode = ref(false);
-
+// 本地存储相关的代码
+const STORAGE_KEY = 'markdown-editor-content';
 // 配置 marked 以支持数学公式
 marked.use(markedKatex({
   // @ts-ignore
@@ -519,15 +521,61 @@ watch(markdownContent, () => {
   });
 });
 
+// 保存内容到本地存储（防抖）
+const saveToLocalStorage = debounce((content: string) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, content);
+    console.log('内容已自动保存');
+  } catch (error) {
+    console.warn('本地存储失败:', error);
+    // 处理存储空间不足的情况
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      showCustomToast('存储空间不足，部分内容可能无法保存', 'warning');
+    }
+  }
+}, 1000); // 防抖
+
+// 从本地存储加载内容
+const loadFromLocalStorage = (): string => {
+  try {
+    return localStorage.getItem(STORAGE_KEY) || '';
+  } catch (error) {
+    console.warn('读取本地存储失败:', error);
+    return '';
+  }
+};
+
+// 监听内容变化并自动保存
+watch(markdownContent, (newContent) => {
+  if (newContent.trim()) {
+    saveToLocalStorage(newContent);
+  }
+});
+
 onMounted(() => {
   // 监听点击事件关闭下拉菜单
   document.addEventListener('click', handleClickOutside);
+  const savedContent = loadFromLocalStorage();
+  if (savedContent) {
+    markdownContent.value = savedContent;
+    console.log('已恢复上次编辑的内容');
+  }
+
+  // 添加 beforeunload 提示
+  window.addEventListener('beforeunload', (e) => {
+    if (markdownContent.value.trim()) {
+      e.preventDefault();
+    }
+  });
 });
 
 // 在组件卸载时移除事件监听
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);
+  saveToLocalStorage.flush();
+
 });
+
 </script>
 
 <style scoped>

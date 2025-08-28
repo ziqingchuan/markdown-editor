@@ -8,6 +8,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+
 }
 
 #app {
@@ -17,6 +18,15 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+/*body {*/
+/*  cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNiIgZmlsbD0iIzYzNjZmMSIvPgo8L3N2Zz4='), auto;*/
+/*}*/
+
+/* 不同状态的光标 */
+a, button {
+  cursor: pointer;
+  /*cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iOCIgZmlsbD0iIzQ2NjZmYSIvPgo8L3N2Zz4='), pointer;*/
 }
 
 

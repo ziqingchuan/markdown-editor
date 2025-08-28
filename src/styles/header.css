@@ -57,7 +57,6 @@
     height: 26px;
     border-radius: 13px;
     background-color: #e0e0e0;
-    cursor: pointer;
     transition: background-color 0.3s;
     overflow: hidden;
 }
@@ -77,6 +76,7 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 2;
+    cursor: pointer;
 }
 
 .toggle-thumb-dark {
@@ -96,6 +96,7 @@
     justify-content: center;
     z-index: 1000;
     transition: opacity 0.3s;
+    cursor: pointer;
 }
 
 .sun-icon {
@@ -141,7 +142,6 @@
     color: white;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s;
     height: 32px;
@@ -198,7 +198,6 @@
     align-items: center;
     gap: 10px;
     padding: 2px 10px;
-    cursor: pointer;
     height: 50px;
     transition: background-color 0.2s;
     font-size: 14px;
