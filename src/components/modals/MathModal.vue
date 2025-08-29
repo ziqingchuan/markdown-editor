@@ -197,7 +197,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, ref, defineEmits, watch, nextTick, computed} from 'vue';
+import {defineProps, ref, defineEmits, watch, nextTick, computed, onMounted} from 'vue';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
@@ -280,6 +280,29 @@ watch(() => props.visible, (newVal) => {
   if (newVal) {
     formulaContent.value = props.defaultContent || '';
     nextTick(() => focusInput());
+  }
+});
+
+// 解决 Firefox 下公式渲染问题
+onMounted(() => {
+  if (navigator.userAgent.includes('Firefox')) {
+    const cleanMathNodes = () => {
+      document.querySelectorAll('math').forEach(math => {
+        [...math.childNodes]
+            .filter(node => node.nodeType === 3)
+            .forEach(node => math.removeChild(node));
+      });
+    };
+
+    // 初始清理
+    cleanMathNodes();
+
+    // 使用 MutationObserver 监听动态添加的内容
+    const observer = new MutationObserver(cleanMathNodes);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   }
 });
 </script>
