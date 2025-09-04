@@ -224,13 +224,26 @@
 }
 
 .toolbar-buttons button {
-    padding: 4px 8px;
+    padding: 0;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 50px;
     transition: all 0.2s;
+    .math-symbol {
+        padding: 0;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    :deep(.katex-mathml math) {
+        padding: 0 !important;
+    }
 }
 
 .math-modal.app-dark .toolbar-buttons button {
