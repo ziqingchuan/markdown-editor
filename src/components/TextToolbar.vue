@@ -151,8 +151,8 @@ const handleDrag = (e: MouseEvent | TouchEvent) => {
 
   let newLeft = clientX - startX.value;
   let newTop = clientY - startY.value;
-  newLeft = Math.max(0, Math.min(newLeft, screenWidth - toolbarWidth));
-  newTop = Math.max(0, Math.min(newTop, screenHeight - toolbarHeight));
+  newLeft = Math.max(0, Math.min(newLeft, screenWidth - toolbarWidth - 30));
+  newTop = Math.max(0, Math.min(newTop, screenHeight - toolbarHeight - 30));
 
   // 更新位置
   toolbarLeft.value = newLeft;
@@ -176,10 +176,10 @@ const initToolbarPosition = () => {
   if (!toolbarRef.value) return;
   const toolbarWidth = toolbarRef.value.offsetWidth;
   const toolbarHeight = toolbarRef.value.offsetHeight;
-  const margin = 10;
+  const margin = 30;
 
   toolbarLeft.value = Math.max(margin, window.innerWidth - toolbarWidth - margin);
-  toolbarTop.value = Math.max(margin, window.innerHeight - toolbarHeight - margin * 3);
+  toolbarTop.value = Math.max(margin, window.innerHeight - toolbarHeight - margin);
   emit('positionChange', toolbarLeft.value, toolbarTop.value);
 };
 
