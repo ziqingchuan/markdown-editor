@@ -4,11 +4,11 @@ export const pdfConfig =  `
         font-weight: 600;
     }
     h1 {
-    font-size: 1.8rem;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.3rem;
-}
-
+        font-size: 1.8rem;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.3rem;
+    }
+    
     h2 {
         font-size: 1.5rem;
         border-bottom: 1px solid #ddd;
@@ -103,13 +103,6 @@ export const pdfConfig =  `
       color: #1a73e8;
       text-decoration: none;
     }
-    /* 公式渲染只渲染他的html */
-    .katex-html {
-        display: none;
-    }
-    .katex-mathml math {
-        padding: 8px;
-    }
     /* 基础样式 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -122,6 +115,6 @@ export const pdfOptions = {
     margin: 10,
     filename: '素笔Mark导出文档.pdf',
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
+    html2canvas: { scale: 3, useCORS: true },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
 };

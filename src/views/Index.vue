@@ -445,7 +445,7 @@ const downloadHtml = async () => {
   }
 };
 
-// 下载PDF文件（已优化html2pdf，继续优化pdfHandler）
+// 下载PDF文件
 const downloadPdf = async () => {
   showDropdown.value = false;
   isLoading.value = true;

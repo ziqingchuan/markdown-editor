@@ -37,309 +37,17 @@
 
         <!-- 公式可视化工具栏（下方） -->
         <div class="formula-toolbar">
-          <!-- 基础运算 -->
-          <div class="toolbar-section">
-            <h4>基础运算</h4>
+          <!-- 循环渲染所有工具栏部分 -->
+          <div class="toolbar-section" v-for="(section, index) in formulaSections" :key="index">
+            <h4>{{ section.title }}</h4>
             <div class="toolbar-buttons">
-              <button @click="insertSymbol('+')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '+' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('-')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '-' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\times')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\times' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\div')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\div' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('=')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '=' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\neq')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\neq' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('<')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '<' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('>')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '>' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\leq')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\leq' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\geq')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\geq' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 上下标 -->
-          <div class="toolbar-section">
-            <h4>上下标</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertTemplate('a^2')">
-                <span class="math-symbol" v-html="marked.parse('$$' + 'a^2' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('a_1')">
-                <span class="math-symbol" v-html="marked.parse('$$' + 'a_1' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('e^{x+y}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + 'e^{x+y}' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('x_{i=1}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + 'x_{i=1}' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 分式与根号 -->
-          <div class="toolbar-section">
-            <h4>分式与根号</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertTemplate('\\frac{a}{b}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\frac{a}{b}' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\sqrt{x}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\sqrt{x}' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\sqrt[3]{x}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\sqrt[3]{x}' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 三角函数 -->
-          <div class="toolbar-section">
-            <h4>三角函数</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertSymbol('\\sin')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\sin' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\cos')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\cos' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\tan')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\tan' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\cot')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\cot' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\sec')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\sec' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\csc')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\csc' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 微积分 -->
-          <div class="toolbar-section">
-            <h4>微积分</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertSymbol('\\int')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\int' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\int_{a}^{b}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\int_{a}^{b}' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\sum')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\sum' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\sum_{i=1}^{n}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\sum_{i=1}^{n}' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\lim')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\lim' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\infty')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\infty' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\partial')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\partial' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 矩阵与集合 -->
-          <div class="toolbar-section">
-            <h4>矩阵与集合</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertTemplate('\\begin{bmatrix}a & b \\\\ c & d\\end{bmatrix}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\begin{bmatrix}a & b \\\\ c & d\\end{bmatrix}' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\in')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\in' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\notin')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\notin' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\subset')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\subset' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\supset')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\supset' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\cup')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\cup' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\cap')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\cap' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 希腊字母 -->
-          <div class="toolbar-section">
-            <h4>希腊字母</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertSymbol('\\alpha')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\alpha' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\beta')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\beta' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\gamma')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\gamma' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\delta')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\delta' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\epsilon')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\epsilon' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\pi')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\pi' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\theta')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\theta' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\lambda')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\lambda' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\mu')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\mu' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\omega')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\omega' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 逻辑符号 -->
-          <div class="toolbar-section">
-            <h4>逻辑符号</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertSymbol('\\forall')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\forall' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\exists')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\exists' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\Rightarrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\Rightarrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\Leftrightarrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\Leftrightarrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\land')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\land' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\lor')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\lor' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\neg')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\neg' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 箭头符号 -->
-          <div class="toolbar-section">
-            <h4>箭头符号</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertSymbol('\\rightarrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\rightarrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\leftarrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\leftarrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\uparrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\uparrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\downarrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\downarrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\leftrightarrow')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\leftrightarrow' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\mapsto')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\mapsto' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 特殊函数 -->
-          <div class="toolbar-section">
-            <h4>特殊函数</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertSymbol('\\log')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\log' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\ln')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\ln' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('!')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '!' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\Gamma')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\Gamma' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\beta')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\beta' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\max')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\max' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\min')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\min' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 向量与矩阵符号 -->
-          <div class="toolbar-section">
-            <h4>向量与矩阵符号</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertTemplate('\\vec{a}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\vec{a}' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('A^T')">
-                <span class="math-symbol" v-html="marked.parse('$$' + 'A^T' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('|A|')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '|A|' + '$$')"></span>
-              </button>
-              <button @click="insertSymbol('\\nabla')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\nabla' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\mathbf{A}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\mathbf{A}' + '$$')"></span>
-              </button>
-            </div>
-          </div>
-          <!-- 括号类 -->
-          <div class="toolbar-section">
-            <h4>括号类</h4>
-            <div class="toolbar-buttons">
-              <button @click="insertTemplate('(a + b)')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '(a + b)' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('[a + b]')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '[a + b]' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\{a + b\\}')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\{a + b\\}' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('|a + b|')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '|a + b|' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\|a + b\\|')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\|a + b\\|' + '$$')"></span>
-              </button>
-              <button @click="insertTemplate('\\left( \\frac{a}{b} \\right)')">
-                <span class="math-symbol" v-html="marked.parse('$$' + '\\left( \\frac{a}{b} \\right)' + '$$')"></span>
+              <!-- 循环渲染每个部分的按钮 -->
+              <button
+                  @click="insertSymbol(symbol.code)"
+                  v-for="(symbol, symIndex) in section.symbols"
+                  :key="symIndex"
+              >
+                <span class="math-symbol" v-html="marked.parse('$$' + symbol.code + '$$')"></span>
               </button>
             </div>
           </div>
@@ -358,7 +66,7 @@ import {defineProps, ref, defineEmits, watch, nextTick, computed, onMounted} fro
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
-
+import {formulaSections} from '../../consts/formulaSections';
 const props = defineProps<{
   visible: boolean;
   isDarkMode: boolean;
@@ -404,11 +112,6 @@ const insertSymbol = (symbol: string) => {
   focusInput();
 };
 
-const insertTemplate = (example: string) => {
-  formulaContent.value += example;
-  focusInput();
-};
-
 const focusInput = async () => {
   await nextTick();
   if (formulaInput.value) {
@@ -442,7 +145,7 @@ watch(() => props.visible, (newVal) => {
 
 // 解决 Firefox 下公式渲染问题
 onMounted(() => {
-  if (navigator.userAgent.includes('Firefox')) {
+  // if (navigator.userAgent.includes('Firefox')) {
     const cleanMathNodes = () => {
       document.querySelectorAll('math').forEach(math => {
         [...math.childNodes]
@@ -460,7 +163,7 @@ onMounted(() => {
       childList: true,
       subtree: true
     });
-  }
+  // }
 });
 </script>
 
