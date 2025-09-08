@@ -304,8 +304,7 @@ export const formulaSections = [
         symbols: [
             { code: '\\vec{a}' },
             { code: '\\vec{AB}' },
-            { code: '\\mathbf{a}' },
-            { code: '\\boldsymbol{a}' },
+            { code: '\\widehat{ac}' },
             { code: '\\mathbf{A}' },
             { code: '\\boldsymbol{A}' },
             { code: '\\cdot' }, // 点积
@@ -370,6 +369,7 @@ export const formulaSections = [
             { code: '\\copyright' }, // 版权符号
             { code: '\\angle' }, // 角符号
             { code: '\\measuredangle' }, // 测量角符号
+            { code: '\\odot' }, // 圆符号
             { code: '\\degree' }, // 度符号
             { code: '\\%' } // 百分号
         ]
