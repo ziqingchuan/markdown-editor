@@ -12,7 +12,7 @@ const compressImage = (
 
         // 如果文件大小小于指定值，则不压缩，返回源文件
         if (fileSizeKB < minSizeToCompress) {
-            console.log(`文件大小 ${fileSizeKB.toFixed(2)}KB 小于 ${minSizeToCompress}KB, 不进行压缩.`)
+            // console.log(`文件大小 ${fileSizeKB.toFixed(2)}KB 小于 ${minSizeToCompress}KB, 不进行压缩.`)
             resolve(file)
             return
         }
@@ -75,7 +75,7 @@ const compressImage = (
                             quality: qualityValue,
                             maxWidth: maxWidth,
                             success(result: any) {
-                                console.log(`压缩成功, 压缩后大小 ${result.size / 1024}KB, 压缩后的文件类型: ${result.type}.`)
+                                // console.log(`压缩成功, 压缩后大小 ${result.size / 1024}KB, 压缩后的文件类型: ${result.type}.`)
                                 resolveCompress(result as File)
                             },
                             error(err: any) {
@@ -97,7 +97,7 @@ const compressImage = (
 
                     if (compressedFile) {
                         const compressedSizeKB = compressedFile.size / 1024
-                        console.log(`尝试压缩质量 ${mid}, 结果文件大小: ${compressedSizeKB.toFixed(2)}KB`)
+                        // console.log(`尝试压缩质量 ${mid}, 结果文件大小: ${compressedSizeKB.toFixed(2)}KB`)
 
                         if (compressedSizeKB <= targetSizeKB) {
                             // 压缩成功且小于目标大小，尝试更高质量
@@ -114,7 +114,7 @@ const compressImage = (
 
                 binarySearchForCompression(0, 1)
                     .then((compressedFile) => {
-                        console.log(`压缩成功, 压缩后大小 ${compressedFile.size / 1024}KB.`)
+                        // console.log(`压缩成功, 压缩后大小 ${compressedFile.size / 1024}KB.`)
                         resolve(compressedFile)
                     })
                     .catch((error) => {
