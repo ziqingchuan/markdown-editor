@@ -622,8 +622,10 @@ const renderMermaidCharts = () => {
             // @ts-ignore
             element.style.display = 'block';
             container.innerHTML = `<div class="mermaid-error">
-            Mermaid 图表渲染错误: ${error.message}
+            <span>Mermaid 图表渲染错误，请打开控制台查看错误信息</span>
           </div>`;
+            // 找到元素并删除
+            document.querySelectorAll('[id^="dmermaid"]').forEach(el => el.remove());
           });
     } catch (error) {
       console.error('Mermaid 处理错误:', error);
