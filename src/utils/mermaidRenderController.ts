@@ -40,7 +40,7 @@ export const renderMermaidCharts = (previewRef: any) => {
                     console.error('Mermaid 渲染错误:', error);
                     // 显示错误信息，同时恢复原始代码块显示
                     // @ts-ignore
-                    element.style.display = 'block';
+                    // element.style.display = 'block';
                     container.innerHTML = `<div class="mermaid-error">
             <span>Mermaid 图表渲染错误，请打开控制台查看错误信息</span>
           </div>`;

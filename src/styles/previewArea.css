@@ -275,39 +275,18 @@
 
 /* mermaid 流程图样式 */
 
-.app-dark :deep(.edgePaths path) {
-    stroke: #ffffff !important;
-}
-
-.app-dark :deep(.nodeLabel) {
-    color: white !important;
-}
-.app-dark :deep(.edgeLabel) {
-    color: white !important;
-    p {
-        background-color: black !important;
-    }
-}
-.app-dark :deep(.label-container) {
-    fill: rgba(147, 112, 219, 0.5) !important;
-    stroke: #ECECFF !important;
-}
-
-:deep(.mermaid-container) {
+:deep(pre.language-mermaid.mermaid-processed) {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-}
-:deep(.edgeLabel) {
-    p {
-        background-color: #f4f4f4 !important;
-    }
+    background-color: #f4f4f4;
 }
 
 :deep(.mermaid-error) {
     color: red;
     width: 100%;
-    font-size: 14px;
+    font-size: 16px;
     display: flex;
     flex-direction: column;
     word-break: break-all; /* 允许在任意字符处换行（适合代码类内容） */
