@@ -48,8 +48,6 @@ export const FileUploadHandler = {
         const text = await file.text(); // 读取 Markdown 文件内容
         return text
             .split('\n') // 按行分割
-            .map(line => line.trim()) // 去除每行的首尾空格
-            .filter(line => line.length > 0) // 过滤掉空行
             .join('\n');
     },
 
