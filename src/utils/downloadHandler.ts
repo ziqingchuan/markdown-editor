@@ -42,7 +42,7 @@ export const pdfHandler = async (renderedMarkdown: any, mermaidInstance: any) =>
             container.className = 'mermaid-container';
             container.style.margin = '20px 0';
             container.style.textAlign = 'center';
-            container.style.backgroundColor = '#f5f5f5';
+            container.style.backgroundColor = 'rgba(232,232,232, 0.8)';
             container.style.borderRadius = '8px';
             container.style.padding = '15px';
             container.style.overflow = 'auto';

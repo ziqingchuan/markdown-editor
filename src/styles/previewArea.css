@@ -126,10 +126,6 @@
     margin-bottom: 1rem;
 }
 
-:deep(.mermaid-processed.language-mermaid) {
-    background-color: #f4f4f4 !important;
-}
-
 :deep(pre)::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Opera */
 }
@@ -275,3 +271,36 @@
 .app-dark :deep(.katex-html) {
     display: none !important;
 }
+
+
+/* mermaid 流程图样式 */
+
+.app-dark :deep(.edgePaths path) {
+    stroke: #ffffff !important;
+}
+
+.app-dark :deep(.nodeLabel) {
+    color: white !important;
+}
+.app-dark :deep(.edgeLabel) {
+    color: white !important;
+    p {
+        background-color: black !important;
+    }
+}
+.app-dark :deep(.label-container) {
+    fill: rgba(147, 112, 219, 0.5) !important;
+    stroke: #ECECFF !important;
+}
+
+:deep(.mermaid-container) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+:deep(.edgeLabel) {
+    p {
+        background-color: #f4f4f4 !important;
+    }
+}
+
