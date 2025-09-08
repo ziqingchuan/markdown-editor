@@ -126,6 +126,10 @@
     margin-bottom: 1rem;
 }
 
+:deep(.mermaid-processed.language-mermaid) {
+    background-color: #f4f4f4 !important;
+}
+
 :deep(pre)::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Opera */
 }

@@ -26,12 +26,46 @@ export const htmlHandler = (html: string) => {
     URL.revokeObjectURL(url);
 }
 
-export const pdfHandler = (renderedMarkdown: any) => {
+export const pdfHandler = async (renderedMarkdown: any, mermaidInstance: any) => {
     const tempElement = document.createElement('div');
-    // 1. 复制预览区内容
     tempElement.innerHTML = renderedMarkdown.value;
 
-    // 新增：清理数学公式节点中的冗余内容
+    // 异步渲染 Mermaid 图表
+    const mermaidElements = tempElement.querySelectorAll('code.language-mermaid');
+
+    for (const element of mermaidElements) {
+        const content = element.textContent?.trim();
+        if (!content) continue;
+
+        try {
+            const container = document.createElement('div');
+            container.className = 'mermaid-container';
+            container.style.margin = '20px 0';
+            container.style.textAlign = 'center';
+            container.style.backgroundColor = '#f5f5f5';
+            container.style.borderRadius = '8px';
+            container.style.padding = '15px';
+            container.style.overflow = 'auto';
+
+            element.parentNode?.replaceChild(container, element);
+
+            const { svg } = await mermaidInstance.render(
+                `mermaid-pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                content
+            );
+            container.innerHTML = svg;
+
+        } catch (error) {
+            console.error('Mermaid PDF 渲染错误:', error);
+            const errorDiv = document.createElement('div');
+            errorDiv.textContent = `Mermaid 图表: ${content.substring(0, 50)}...`;
+            errorDiv.style.color = '#666';
+            errorDiv.style.fontStyle = 'italic';
+            element.parentNode?.replaceChild(errorDiv, element);
+        }
+    }
+
+    // 清理数学公式节点中的冗余内容
     const cleanMathNodes = () => {
         // 移除所有katex-html类元素
         tempElement.querySelectorAll('.katex-html').forEach(el => {

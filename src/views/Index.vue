@@ -237,6 +237,7 @@ import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
+import mermaid from 'mermaid';
 import { debounce } from 'lodash-es';
 // 1. 引入Prism核心库（替换highlight.js）
 // @ts-ignore
@@ -451,15 +452,24 @@ const downloadPdf = async () => {
   isLoading.value = true;
   let tempElement: any;
   try {
-    // 动态导入html2pdf和downloadHandler
-    const [html2pdfModule] = await Promise.all([
-      // @ts-ignore
-      import('html2pdf.js')
+    // 动态导入
+    const [html2pdfModule, mermaidModule] = await Promise.all([
+        // @ts-ignore
+      import('html2pdf.js'),
+      import('mermaid')
     ]);
+
     const html2pdf = html2pdfModule.default;
+    const mermaid = mermaidModule.default;
     const { pdfHandler } = await import("../utils/downloadHandler.ts");
 
-    tempElement = pdfHandler(renderedMarkdown);
+    mermaid.initialize({
+      theme: 'default',
+      securityLevel: 'loose',
+      fontFamily: 'inherit',
+    });
+
+    tempElement = await pdfHandler(renderedMarkdown, mermaid);
     // document.body.appendChild(tempElement);
     const {pdfOptions} = await import("../consts/pdfConfig.ts");
     await html2pdf().from(tempElement).set(pdfOptions).save();
@@ -522,6 +532,7 @@ watch(markdownContent, () => {
         // 使用 Prism 进行代码高亮
         Prism.highlightElement(block as HTMLElement);
       });
+      renderMermaidCharts();
     }
   });
 });
@@ -537,10 +548,12 @@ watch(isHtmlMode, (curMode) => {
           // 使用 Prism 进行代码高亮
           Prism.highlightElement(block as HTMLElement);
         });
+        renderMermaidCharts();
       }
     }
   });
 });
+
 
 // 保存内容到本地存储（防抖）
 const saveToLocalStorage = debounce((content: string) => {
@@ -566,6 +579,61 @@ const loadFromLocalStorage = (): string => {
   }
 };
 
+// 渲染 Mermaid 图表的函数
+const renderMermaidCharts = () => {
+  if (!previewRef.value) return;
+
+  const mermaidElements = previewRef.value.querySelectorAll('code.language-mermaid');
+
+  mermaidElements.forEach((element) => {
+    const content = element.textContent?.trim();
+    if (!content) return;
+
+    // 检查是否已经渲染过
+    if (element.parentElement?.classList.contains('mermaid-processed')) {
+      return;
+    }
+
+    try {
+      // 隐藏原始的代码块
+      // @ts-ignore
+      element.style.display = 'none';
+
+      // 标记父元素已处理
+      if (element.parentElement) {
+        element.parentElement.classList.add('mermaid-processed');
+      }
+
+      // 创建容器用于渲染
+      const container = document.createElement('div');
+      container.className = 'mermaid-container';
+
+      // 插入到代码块前面
+      element.parentNode?.insertBefore(container, element);
+
+      // 使用 Mermaid 渲染
+      mermaid.render(`mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, content)
+          .then(({ svg }) => {
+            container.innerHTML = svg;
+          })
+          .catch((error) => {
+            console.error('Mermaid 渲染错误:', error);
+            // 显示错误信息，同时恢复原始代码块显示
+            // @ts-ignore
+            element.style.display = 'block';
+            container.innerHTML = `<div class="mermaid-error">
+            Mermaid 图表渲染错误: ${error.message}
+          </div>`;
+          });
+    } catch (error) {
+      console.error('Mermaid 处理错误:', error);
+      // 出错时恢复显示原始代码块
+      // @ts-ignore
+      element.style.display = 'block';
+    }
+  });
+};
+
 const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value;
   localStorage.setItem(THEME_KEY, isDarkMode.value ? 'dark' : 'light');
@@ -589,6 +657,13 @@ onMounted(() => {
     markdownContent.value = savedContent;
     console.log('已恢复上次编辑的内容');
   }
+  // 初始化 Mermaid 配置
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    fontFamily: 'inherit',
+  });
 
   // 添加 beforeunload 提示
   window.addEventListener('beforeunload', (e) => {
