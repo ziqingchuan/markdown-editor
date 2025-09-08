@@ -10,7 +10,8 @@ export default defineConfig({
         threshold: 10240, // 大于10KB的文件才压缩
       })
   ],
-  base: './',
+  // base: './',
+  base: '/markdown-editor/',
   optimizeDeps: {
     include: ['mammoth', 'pdfjs-dist'],
   },

@@ -384,7 +384,6 @@ export const formulaSections = [
             { code: 'p \\nmid n' }, // 不整除
             { code: '\\equiv' }, // 同余
             { code: '\\not\\equiv' }, // 不同余
-            { code: '\\cong' }, // 同构
             { code: '\\sim' }, // 相似
             { code: '\\approx' }, // 近似
             { code: '\\propto' }, // 正比
