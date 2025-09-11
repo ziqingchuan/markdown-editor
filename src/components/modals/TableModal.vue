@@ -83,7 +83,7 @@ watch(() => props.visible, (newVal) => {
   if (newVal) {
     rows.value = props.defaultRows || 3;
     cols.value = props.defaultCols || 3;
-    console.log(props.isDarkMode);
+    // console.log(props.isDarkMode);
   }
 });
 </script>

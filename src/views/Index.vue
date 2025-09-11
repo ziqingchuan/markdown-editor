@@ -257,6 +257,8 @@ import { debounce } from 'lodash-es';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
 import {syncScroll} from "../utils/scrollHandler.ts";
+import { useHistoryStore } from '../stores/historyStore';
+
 // import {initialMarkdownContent} from "../consts/markdownContent.ts";
 import { keyboardHandler } from "../utils/keyboardHandler.ts";
 import { renderMermaidCharts, unRenderMermaidCharts } from "../utils/mermaidRenderController.ts";
@@ -299,6 +301,8 @@ const STORAGE_KEY = 'markdown-editor-content';
 const THEME_KEY = 'markdown-editor-theme';
 // 初始化Markdown内容
 const markdownContent = ref('');
+const historyStore = useHistoryStore();
+
 // 渲染后的HTML
 const renderedMarkdown = computed(() => {
   // @ts-ignore
@@ -529,16 +533,31 @@ const showCustomToast = (message: any, type = 'success') => {
 // 工具类：插入内容到光标处
 const addContentToEditor = (content: string) => {
   if (!editorRef.value) return;
-  // 插入表格到编辑器（光标位置）
+
   const editor = editorRef.value;
   const startPos = editor.selectionStart;
   const endPos = editor.selectionEnd;
 
+  // 计算插入后的光标位置（原起始位置 + 插入内容长度）
+  const newCursorPos = startPos + content.length;
+
+  // 更新内容
   markdownContent.value =
       markdownContent.value.substring(0, startPos) +
-      content+
+      content +
       markdownContent.value.substring(endPos);
-}
+
+  // 确保DOM更新后再设置光标位置
+  setTimeout(() => {
+    if (editorRef.value) {
+      // 设置光标位置（开始和结束位置相同，即光标闪烁处）
+      editorRef.value.selectionStart = newCursorPos;
+      editorRef.value.selectionEnd = newCursorPos;
+      // 聚焦编辑器，确保光标可见
+      editorRef.value.focus();
+    }
+  }, 0);
+};
 
 // 保存内容到本地存储（防抖）
 const saveToLocalStorage = debounce((content: string) => {
@@ -614,6 +633,7 @@ onBeforeUnmount(() => {
 
 // 监听代码块的高亮
 watch(markdownContent, (newContent) => {
+  historyStore.recordChange(newContent);
   saveToLocalStorage(newContent);
   renderMermaid.value = false;
   nextTick(() => {

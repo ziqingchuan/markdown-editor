@@ -132,7 +132,7 @@ const handleConfirm = () => {
   }
 
   const mathContent = `\n$$\n ${formulaContent.value}\n$$\n`;
-  console.log(mathContent);
+  // console.log(mathContent);
   emit('confirm', mathContent);
 };
 

@@ -1,6 +1,7 @@
 // src/utils/keyboardHandler.ts
 import { nextTick } from 'vue';
 import type { Ref } from 'vue';
+import { useHistoryStore } from '../stores/historyStore'; // 导入Pinia存储
 
 /**
  * 处理Tab键事件，插入4个空格
@@ -50,6 +51,25 @@ export const handleTabKey = async (
     }
 };
 
+// 处理撤销操作 (Ctrl+Z)
+const handleUndo = (markdownContent: Ref<string>) => {
+    const historyStore = useHistoryStore();
+    const prevContent = historyStore.undo(markdownContent.value);
+    // console.log('取出来的上一次状态：', prevContent);
+    if (prevContent !== null) {
+        markdownContent.value = prevContent;
+    }
+};
+
+// 处理重做操作 (Ctrl+Shift+Z 或 Ctrl+Y)
+const handleRedo = (markdownContent: Ref<string>) => {
+    const historyStore = useHistoryStore();
+    const nextContent = historyStore.redo(markdownContent.value);
+    if (nextContent !== null) {
+        markdownContent.value = nextContent;
+    }
+};
+
 /**
  * 统一的键盘事件处理入口
  * @param e 键盘事件对象
@@ -61,6 +81,33 @@ export const keyboardHandler = async (
     editorRef: Ref<HTMLTextAreaElement | undefined>,
     markdownContent: Ref<string>
 ) => {
+    // 判断Ctrl键是否按下
+    const isCtrl = e.ctrlKey || e.metaKey; // metaKey适配Mac的Command键
+    // 判断Shift键是否按下
+    const isShift = e.shiftKey;
+
+    // 优先处理组合键
+    if (isCtrl) {
+        switch (e.key.toLowerCase()) {
+            case 'z':
+                e.preventDefault();
+                if (isShift) {
+                    // console.log('Ctrl+Shift+Z');
+                    // Ctrl+Shift+Z 重做
+                    handleRedo(markdownContent);
+                } else {
+                    // console.log('Ctrl+Z');
+                    // Ctrl+Z 撤销
+                    handleUndo(markdownContent);
+                }
+                return;
+            // case 'y':
+            //     e.preventDefault();
+            //     // Ctrl+Y 重做
+            //     handleRedo(markdownContent);
+            //     return;
+        }
+    }
     // 根据按键类型分发处理
     switch (e.key) {
         case 'Tab':
