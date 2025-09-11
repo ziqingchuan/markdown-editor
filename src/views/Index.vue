@@ -244,6 +244,12 @@
       @confirm="handleJsonSchemaConfirm"
       @error="(msg: any) => showCustomToast(msg, 'error')"
   />
+  <!-- 每日通知弹窗 -->
+  <DailyNotice
+      :visible="showDailyNotice"
+      :is-dark-mode="isDarkMode"
+      @close="handleNoticeClose"
+  />
 </template>
 
 <script setup lang="ts">
@@ -258,7 +264,7 @@ import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
 import {syncScroll} from "../utils/scrollHandler.ts";
 import { useHistoryStore } from '../stores/historyStore';
-
+import { getCurrentDate } from '../utils/dateHandler.ts';
 // import {initialMarkdownContent} from "../consts/markdownContent.ts";
 import { keyboardHandler } from "../utils/keyboardHandler.ts";
 import { renderMermaidCharts, unRenderMermaidCharts } from "../utils/mermaidRenderController.ts";
@@ -269,6 +275,7 @@ const TableModal = defineAsyncComponent(() => import('../components/modals/Table
 const MathModal = defineAsyncComponent(() => import('../components/modals/MathModal.vue'));
 const EmojiModal = defineAsyncComponent(() => import('../components/modals/EmojiModal.vue'));
 const JsonSchemaModal = defineAsyncComponent(() => import('../components/modals/JsonSchemaModal.vue'));
+const DailyNotice = defineAsyncComponent(() => import("../components/modals/DailyNotice.vue"));
 const CustomToast = defineAsyncComponent(() => import('../components/CustomToast.vue'));
 const TextToolbar = defineAsyncComponent(() => import("../components/TextToolbar.vue"));
 // 状态管理
@@ -280,6 +287,7 @@ const toastMessage = ref('');
 const toastType = ref('success'); // success/error
 const onlyEdit = ref(false); // 编辑模式
 const onlyPreview = ref(false); // 预览模式
+const showDailyNotice = ref(false);
 // 获取DOM引用
 const editorRef = ref<HTMLTextAreaElement>();
 const previewRef = ref<HTMLDivElement>();
@@ -588,6 +596,28 @@ const toggleTheme = () => {
   localStorage.setItem(THEME_KEY, isDarkMode.value ? 'dark' : 'light');
 }
 
+// 检查是否需要显示通知
+const checkDailyNotice = () => {
+  const STORAGE_KEY = 'lastNoticeClosedDate';
+
+  const lastClosedDate = localStorage.getItem(STORAGE_KEY);
+  const currentDate = getCurrentDate();
+
+  // 如果没有记录或记录的日期不是今天，则显示
+  if (!lastClosedDate || lastClosedDate !== currentDate) {
+    showDailyNotice.value = true;
+  }
+};
+
+// 处理弹窗关闭
+const handleNoticeClose = () => {
+  const STORAGE_KEY = 'lastNoticeClosedDate';
+  const currentDate = getCurrentDate();
+
+  localStorage.setItem(STORAGE_KEY, currentDate);
+  showDailyNotice.value = false;
+};
+
 /**
  * ================================================== 生命周期函数 ==================================================
  */
@@ -595,6 +625,8 @@ const toggleTheme = () => {
 onMounted(() => {
   // 监听点击事件关闭下拉菜单
   document.addEventListener('click', handleClickOutside);
+  // 检查是否显示每日通知
+  checkDailyNotice();
   const savedContent = loadFromLocalStorage();
   const theme = localStorage.getItem(THEME_KEY);
   // console.log('theme', theme);
