@@ -109,6 +109,10 @@ export const pdfConfig =  `
       line-height: 1.6;
       color: #333;
     }
+    /* 防止被横向截断 */
+    pre code, p, table {
+        page-break-inside: avoid;
+    }
   `;
 
 export const pdfOptions = {
