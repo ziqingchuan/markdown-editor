@@ -168,5 +168,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-@import '../../styles/MathModal.css';
+@import '../../styles/mathModal.css';
 </style>
