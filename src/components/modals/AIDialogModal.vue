@@ -46,12 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import {defineEmits, defineProps, nextTick, ref, watch} from 'vue';
+import {defineEmits, defineProps, ref} from 'vue';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
 // @ts-ignore
 import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css';
+
 
 interface Message {
   role: 'ai' | 'user';
