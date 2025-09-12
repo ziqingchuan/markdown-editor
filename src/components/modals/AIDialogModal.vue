@@ -213,7 +213,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
   // Shift+Enter 会自然换行（不需要处理）
 };
-watch(messages, () => {
+watch([messages, props.visible], () => {
   nextTick(() => {
     // 只高亮预览区域内的代码块
     const previewContainer = document.querySelector('.messages-container');
