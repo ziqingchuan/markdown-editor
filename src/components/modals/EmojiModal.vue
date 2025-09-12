@@ -39,7 +39,7 @@
               @click="handleSelect(emoji.unicode)"
           >
             <div class="emoji-char">{{ emoji.unicode }}</div>
-            <div class="emoji-code">:{{ formatShortcode(emoji.shortcode) }}:</div>
+            <div class="emoji-code">{{ formatShortcode(emoji.shortcode) }}</div>
           </div>
 
           <!-- 无结果提示 -->
