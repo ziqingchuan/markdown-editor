@@ -13,7 +13,7 @@
               :class="['message', message.role]"
           >
             <!-- 使用 v-html 渲染 Markdown -->
-            <div v-if="message.role === 'ai'" v-html="message.content"></div>
+            <div v-if="message.role === 'ai'" v-html="marked.parse(message.content)"></div>
             <div v-if="message.role === 'user'">{{ message.content }}</div>
           </div>
 
@@ -180,7 +180,8 @@ const sendMessage = async () => {
 
     // 完整响应后，用 markdown-it 渲染
     // @ts-ignore
-    messages.value[aiMessageIndex].content = DOMPurify.sanitize(marked.parse(fullResponse))
+    console.log(fullResponse);
+    messages.value[aiMessageIndex].content = fullResponse;
     messages.value = [...messages.value];
 
   }
