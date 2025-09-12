@@ -180,10 +180,17 @@ const sendMessage = async () => {
     // 完整响应后，用 markdown-it 渲染
     // @ts-ignore
     const handleInlineFormula = (content: string) => {
-      // 正则匹配行内公式（$xxx$），排除块级公式（$$xxx$$）
-      const inlineFormulaReg = /(?<!\$)\$([^\$\n]+)\$(?!\$)/g;
-      // 替换逻辑：给匹配到的 $xxx$ 前后各加一个空格（处理边界空格重复问题）
-      return content.replace(inlineFormulaReg, ' $1 $');
+      // 改进后的正则，允许公式内容包含$，但确保整个公式不被$$包围
+      const inlineFormulaReg = /(?<!\$)\$((?:[^$\n]|\$[^$\n])+?)\$(?!\$)/g;
+
+      // 替换逻辑：只在必要时添加空格
+      return content.replace(inlineFormulaReg, (match, p1) => {
+        // 检查前后是否已有空格
+        const hasLeadingSpace = match.startsWith(' $');
+        const hasTrailingSpace = match.endsWith('$ ');
+
+        return `${hasLeadingSpace ? '' : ' '}$${p1}$${hasTrailingSpace ? '' : ' '}`;
+      });
     };
     messages.value[aiMessageIndex].content = handleInlineFormula(fullResponse);
     messages.value = [...messages.value];
