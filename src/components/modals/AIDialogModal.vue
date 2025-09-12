@@ -12,8 +12,8 @@
               :key="index"
               :class="['message', message.role]"
           >
-            <!-- 直接渲染提前处理好的 HTML，不再临时 parse -->
-            <div v-if="message.role === 'ai'" v-html="message.content"></div>
+            <!-- 使用 v-html 渲染 Markdown -->
+            <div v-if="message.role === 'ai'" v-html="marked.parse(message.content)"></div>
             <div v-if="message.role === 'user'">{{ message.content }}</div>
           </div>
 
@@ -26,13 +26,13 @@
           </div>
         </div>
         <div class="input-container">
-          <textarea
-              v-model="userInput"
-              placeholder="输入您的问题..."
-              @keydown="handleKeydown"
-              ref="textareaRef"
-              rows="1"
-          ></textarea>
+               <textarea
+                   v-model="userInput"
+                   placeholder="输入您的问题..."
+                   @keydown="handleKeydown"
+                   ref="textareaRef"
+                   rows="1"
+               ></textarea>
           <button
               @click="sendMessage"
               :disabled="isLoading || !userInput.trim()"
@@ -46,25 +46,20 @@
 </template>
 
 <script setup lang="ts">
-import { defineEmits, defineProps, nextTick, ref } from 'vue';
-import { marked } from 'marked';
+import {defineEmits, defineProps, nextTick, ref, watch} from 'vue';
+import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
+// @ts-ignore
 import Prism from 'prismjs';
-// 1. 补全 Prism 依赖：导入核心样式 + 常用语言定义
 import 'prismjs/themes/prism-tomorrow.css';
-import 'prismjs/components/prism-javascript'; // JS
-import 'prismjs/components/prism-typescript'; // TS
-import 'prismjs/components/prism-css'; // CSS
-import 'prismjs/components/prism-python'; // Python
-import 'prismjs/components/prism-json'; // JSON
+
 
 interface Message {
   role: 'ai' | 'user';
-  content: string; // 存储「渲染后的 HTML」，不再是原始文本
+  content: string;
 }
-
-// 2. 配置 marked：整合 Katex + Prism 高亮，逻辑和第一个写法对齐
+// 配置 marked 以支持数学公式
 marked.use(markedKatex({
   // @ts-ignore
   katexOptions: {
@@ -74,38 +69,30 @@ marked.use(markedKatex({
     trust: true
   }
 }));
-
+// 配置marked高亮代码
 marked.setOptions({
   // @ts-ignore
-  highlight: function (code: string, lang: string | undefined) {
-    // 处理 lang 为 undefined 的情况（无指定语言）
-    if (!lang) lang = 'plaintext';
-    // 检查 Prism 是否支持该语言，不支持则用 plaintext
-    const validLang = Prism.languages[lang as keyof typeof Prism.languages]
-        ? lang
-        : 'plaintext';
-    // 调用 Prism 生成高亮 HTML（和第一个写法的 hljs 逻辑一致）
-    return Prism.highlight(code, Prism.languages[validLang as keyof typeof Prism.languages], validLang);
+  highlight: function (code: string, language: string) {
+    // 检查 Prism 是否支持该语言
+    const validLanguage = Prism.languages[language] ? language : 'plaintext';
+    // 使用 Prism 进行代码高亮
+    return Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
   },
-  breaks: true,
-  gfm: true
+  breaks: true, // 支持换行
+  gfm: true // 支持GFM语法
 });
 
 const props = defineProps<{
-  visible: boolean;
-  isDarkMode: boolean;
+  visible: boolean;       // 控制弹窗显示/隐藏
+  isDarkMode: boolean;    // 暗黑模式状态
 }>();
 const emit = defineEmits<{
-  (e: 'close'): void;
-  (e: 'error', error: string): void;
+  (e: 'close'): void; // 关闭弹窗
+  (e: 'error', error: string): void; // 错误信息
 }>();
 
 const messages = ref<Message[]>([
-  {
-    role: 'ai',
-    // 初始化消息也提前渲染成 HTML
-    content: '你好！我是素笔 Mark的AI助手，有什么可以帮您的吗？',
-  },
+  { role: 'ai', content: '你好！我是素笔 Mark的AI助手，有什么可以帮您的吗？' }
 ]);
 const userInput = ref('');
 const isLoading = ref(false);
@@ -118,7 +105,7 @@ const closeDialog = () => {
 const sendMessage = async () => {
   if (!userInput.value.trim() || isLoading.value) return;
 
-  // 添加用户消息（纯文本，无需渲染）
+  // 添加用户消息
   messages.value.push({
     role: 'user',
     content: userInput.value
@@ -128,7 +115,7 @@ const sendMessage = async () => {
   userInput.value = '';
   isLoading.value = true;
 
-  // 添加 AI 消息占位（初始为空 HTML）
+  // 添加一个空的 AI 消息占位
   const aiMessageIndex = messages.value.push({
     role: 'ai',
     content: ''
@@ -143,17 +130,16 @@ const sendMessage = async () => {
       },
       body: JSON.stringify({
         model: 'lite',
-        messages: [{ role: 'user', content: question }],
+        messages: [{
+          role: 'user',
+          content: question
+        }],
         stream: true
       })
     });
 
-    if (!response.ok) {
-      const error = `HTTP error! status: ${response.status}`;
-      emit('error', error);
-      return;
-    }
-    if (!response.body) return;
+    if (!response.ok) alert(`HTTP error! status: ${response.status}`);
+    if (!response.body) return '';
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
@@ -175,17 +161,15 @@ const sendMessage = async () => {
             const data = JSON.parse(jsonStr);
             if (data.choices && data.choices[0].delta.content) {
               fullResponse += data.choices[0].delta.content;
-              // 流式过程中：临时渲染（可选，也可只在结束后渲染）
-              // @ts-ignore
-              const tempHtml = DOMPurify.sanitize(marked.parse(fullResponse));
-              messages.value[aiMessageIndex].content = tempHtml;
+              // 实时更新内容
+              messages.value[aiMessageIndex].content = fullResponse;
               messages.value = [...messages.value];
 
               // 滚动到底部
-              nextTick(() => {
+              setTimeout(() => {
                 const container = document.querySelector('.messages-container');
                 if (container) container.scrollTop = container.scrollHeight;
-              });
+              }, 50);
             }
           } catch (e) {
             console.error('解析 JSON 失败:', e);
@@ -194,17 +178,16 @@ const sendMessage = async () => {
       }
     }
 
-    // 3. 回复完成后：一次性渲染成带高亮的 HTML（和第一个写法逻辑对齐）
+    // 完整响应后，用 markdown-it 渲染
     // @ts-ignore
-    const finalHtml = DOMPurify.sanitize(marked.parse(fullResponse));
-    messages.value[aiMessageIndex].content = finalHtml;
+    messages.value[aiMessageIndex].content = fullResponse;
     messages.value = [...messages.value];
 
-  } catch (error) {
+  }
+
+  catch (error) {
     console.error('API 调用失败:', error);
-    // @ts-ignore
-    const errorHtml = DOMPurify.sanitize(marked.parse(`抱歉，处理您的请求时出错: ${error}`));
-    messages.value[aiMessageIndex].content = errorHtml;
+    messages.value[aiMessageIndex].content = `抱歉，处理您的请求时出错: ${error}`;
   } finally {
     isLoading.value = false;
   }
@@ -216,7 +199,20 @@ const handleKeydown = (e: KeyboardEvent) => {
     e.preventDefault();
     sendMessage();
   }
+  // Shift+Enter 会自然换行（不需要处理）
 };
+watch(messages, () => {
+  nextTick(() => {
+    // 只高亮预览区域内的代码块
+    const previewContainer = document.querySelector('.message');
+    if (previewContainer) {
+      previewContainer.querySelectorAll('pre code').forEach((block) => {
+        // 使用 Prism 进行代码高亮
+        Prism.highlightElement(block as HTMLElement);
+      });
+    }
+  });
+}, { immediate: true });
 </script>
 
 <style scoped>
