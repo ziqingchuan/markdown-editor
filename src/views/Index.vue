@@ -179,7 +179,7 @@
 
     <!-- 页脚 -->
     <footer v-show="!isFullScreen" class="footer">
-      <p>© 2025    <a target="_blank" href="https://try-catch.life/">try-catch.life</a></p>
+      <p>© 2025 marklite.cn</p>
     </footer>
 
     <!-- 加载提示 -->
