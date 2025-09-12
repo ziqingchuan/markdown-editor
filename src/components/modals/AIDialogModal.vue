@@ -85,6 +85,7 @@ const props = defineProps<{
   visible: boolean;       // 控制弹窗显示/隐藏
   isDarkMode: boolean;    // 暗黑模式状态
 }>();
+
 const emit = defineEmits<{
   (e: 'close'): void; // 关闭弹窗
   (e: 'error', error: string): void; // 错误信息
@@ -213,7 +214,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
   // Shift+Enter 会自然换行（不需要处理）
 };
-watch([messages, props.visible], () => {
+watch([messages, () => props.visible], () => {
   nextTick(() => {
     // 只高亮预览区域内的代码块
     const previewContainer = document.querySelector('.messages-container');
@@ -225,6 +226,7 @@ watch([messages, props.visible], () => {
     }
   });
 }, { immediate: true });
+
 </script>
 
 <style scoped>
