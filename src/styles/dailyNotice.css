@@ -1,0 +1,184 @@
+/* 遮罩层 */
+.daily-notice-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 弹窗容器 - 基础样式 */
+.daily-notice-container {
+    width: 90%;
+    max-width: 700px;
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* 用于关闭按钮定位 */
+}
+
+/* 暗黑模式样式 - 通过动态class切换 */
+.daily-notice-container.dark-mode {
+    background-color: #515151;
+    color: #f8fafc;
+}
+
+/* 关闭按钮 */
+.daily-notice-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #252525;
+    transition: color 0.2s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    z-index: 1001;
+}
+
+.daily-notice-close:hover {
+    color: #0f172a;
+    background-color: #f1f5f9;
+}
+
+.daily-notice-container.dark-mode .daily-notice-close {
+    color: #fff;
+}
+
+.daily-notice-container.dark-mode .daily-notice-close:hover {
+    color: #ffffff;
+    background-color: #393939;
+}
+
+/* 头部样式 */
+.daily-notice-header {
+    padding: 20px 24px;
+    position: relative;
+}
+
+.sub-title {
+    margin-top: 20px;
+}
+
+.daily-notice-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.daily-notice-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+/* 内容区域 */
+.daily-notice-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: thin; /* Firefox：设置滚动条宽度（thin/auto/none） */
+    scrollbar-color: rgba(209, 209, 209, 0.5) transparent; /* Firefox：滚动条滑块颜色 + 轨道颜色 */
+}
+
+/* 功能项样式 */
+.feature-item {
+    display: flex;
+    margin-bottom: 24px;
+    align-items: flex-start;
+}
+
+.feature-item:last-child {
+    margin-bottom: 0;
+}
+
+.feature-icon {
+    background-color: rgba(49, 119, 234, 0.58);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    flex-shrink: 0;
+    color: #3b82f6;
+}
+.daily-notice-container.dark-mode .daily-notice-header {
+    background-color: #515151;
+}
+
+.daily-notice-container.dark-mode .feature-icon {
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+.feature-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: #1e293b;
+}
+
+.daily-notice-container.dark-mode .feature-info h3 {
+    color: #e2e8f0;
+}
+
+.feature-info p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.daily-notice-container.dark-mode .feature-info p {
+    color: #f8fafc;
+}
+
+/* 底部样式 */
+.daily-notice-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+}
+
+.daily-notice-container.dark-mode .daily-notice-footer {
+    border-top: 1px solid #334155;
+}
+
+.daily-notice-footer p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

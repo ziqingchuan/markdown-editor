@@ -11,6 +11,16 @@ export default defineConfig({
       })
   ],
   base: './',
+  server: {
+    host: true, // 确保可以通过局域网访问
+    proxy: {
+      '/proxy': {
+        target: 'https://spark-api-open.xf-yun.com', // 确保地址和端口正确
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   // base: '/markdown-editor/',
   optimizeDeps: {
     include: ['mammoth', 'pdfjs-dist'],
