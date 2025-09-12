@@ -48,7 +48,6 @@
 <script setup lang="ts">
 import {defineEmits, defineProps, nextTick, ref, watch} from 'vue';
 import {marked} from 'marked';
-import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
 // @ts-ignore
 import Prism from 'prismjs';
@@ -180,7 +179,13 @@ const sendMessage = async () => {
 
     // 完整响应后，用 markdown-it 渲染
     // @ts-ignore
-    messages.value[aiMessageIndex].content = fullResponse;
+    const handleInlineFormula = (content: string) => {
+      // 正则匹配行内公式（$xxx$），排除块级公式（$$xxx$$）
+      const inlineFormulaReg = /(?<!\$)\$([^\$\n]+)\$(?!\$)/g;
+      // 替换逻辑：给匹配到的 $xxx$ 前后各加一个空格（处理边界空格重复问题）
+      return content.replace(inlineFormulaReg, ' $1 $');
+    };
+    messages.value[aiMessageIndex].content = handleInlineFormula(fullResponse);
     messages.value = [...messages.value];
 
   }
