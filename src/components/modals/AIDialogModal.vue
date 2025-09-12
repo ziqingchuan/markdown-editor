@@ -204,7 +204,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 watch(messages, () => {
   nextTick(() => {
     // 只高亮预览区域内的代码块
-    const previewContainer = document.querySelector('.message');
+    const previewContainer = document.querySelector('.messages-container');
     if (previewContainer) {
       previewContainer.querySelectorAll('pre code').forEach((block) => {
         // 使用 Prism 进行代码高亮
