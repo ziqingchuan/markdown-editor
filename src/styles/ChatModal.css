@@ -210,6 +210,10 @@
     scrollbar-color: rgba(209, 209, 209, 0.5) transparent; /* Firefox：滚动条滑块颜色 + 轨道颜色 */
 }
 
+.ai-dialog-container.dark-mode .message.ai :deep(pre) {
+    background-color: #0b0b0b;
+}
+
 .message.ai :deep(code) {
     font-family: 'Courier New', Courier, monospace;
     padding: 2px 4px;

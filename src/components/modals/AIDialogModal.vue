@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineEmits, defineProps, ref} from 'vue';
+import {defineEmits, defineProps, nextTick, ref, watch} from 'vue';
 import {marked} from 'marked';
 import DOMPurify from 'dompurify';
 import markedKatex from 'marked-katex-extension';
@@ -180,7 +180,6 @@ const sendMessage = async () => {
 
     // 完整响应后，用 markdown-it 渲染
     // @ts-ignore
-    console.log(fullResponse);
     messages.value[aiMessageIndex].content = fullResponse;
     messages.value = [...messages.value];
 
@@ -202,7 +201,18 @@ const handleKeydown = (e: KeyboardEvent) => {
   }
   // Shift+Enter 会自然换行（不需要处理）
 };
-
+watch(messages, () => {
+  nextTick(() => {
+    // 只高亮预览区域内的代码块
+    const previewContainer = document.querySelector('.message.ai');
+    if (previewContainer) {
+      previewContainer.querySelectorAll('pre code').forEach((block) => {
+        // 使用 Prism 进行代码高亮
+        Prism.highlightElement(block as HTMLElement);
+      });
+    }
+  });
+}, { immediate: true });
 </script>
 
 <style scoped>
