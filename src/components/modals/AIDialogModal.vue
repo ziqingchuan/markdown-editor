@@ -123,7 +123,7 @@ const sendMessage = async () => {
     const response = await fetch('/proxy/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer xmvyPnWEdDUsSsAJXPFV:ivlDhHshnlcPhKvTUZzY',
+        'Authorization': 'Bearer RYgyOdUtHftbMIUzLGYn:GHYPENAGGxzUADAarZRc',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
