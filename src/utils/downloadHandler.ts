@@ -31,6 +31,52 @@ export const pdfHandler = async (renderedMarkdown: any, mermaidInstance: any) =>
     const tempElement = document.createElement('div');
     tempElement.innerHTML = renderedMarkdown.value;
 
+    // 等待所有图片加载完成
+    const waitForImages = () => {
+        console.log('等待图片加载完成...');
+        const images = tempElement.querySelectorAll('img');
+        if (images.length === 0) return Promise.resolve();
+
+        const imagePromises = Array.from(images).map(img => {
+            // 对于外部图片，创建新的Image对象来加载
+            return new Promise((resolve, reject) => {
+                // 存储原始src
+                const originalSrc = 'loadImg'+ img.src.substring(24);
+
+                // 尝试加载图片
+                const imgLoader = new Image();
+                imgLoader.crossOrigin = "anonymous"; // 处理跨域图片
+                imgLoader.src = originalSrc;
+
+                imgLoader.onload = () => {
+                    // 图片加载成功，可以选择转为base64以确保PDF中可用
+                    const canvas = document.createElement('canvas');
+                    canvas.width = imgLoader.width;
+                    canvas.height = imgLoader.height;
+
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                        ctx.drawImage(imgLoader, 0, 0);
+                        // 将图片转换为base64并替换原src
+                        img.src = canvas.toDataURL('image/png');
+                    }
+                    resolve(true);
+                };
+
+                imgLoader.onerror = (error) => {
+                    console.error(`图片加载失败: ${originalSrc}`, error);
+                    // 加载失败时仍然resolve，避免整个PDF生成失败
+                    resolve(false);
+                };
+            });
+        });
+
+        return Promise.all(imagePromises);
+    };
+
+    // 先等待所有图片加载并转换
+    await waitForImages();
+
     // 异步渲染 Mermaid 图表
     const mermaidElements = tempElement.querySelectorAll('code.language-mermaid');
 

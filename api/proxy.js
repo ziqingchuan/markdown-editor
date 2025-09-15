@@ -5,7 +5,10 @@ export default (req, res) => {
     if (req.url.startsWith('/upload')) {
         target = 'https://www.picgo.net';
     }
-    else if (req.url.startsWith('/proxy')) {
+    if (req.url.startsWith('/loadImg')) {
+        target = 'https://www.picgo.net';
+    }
+    else if (req.url.startsWith('/chat')) {
         target = 'https://spark-api-open.xf-yun.com';
     }
     // 创建代理对象并转发请求
@@ -13,8 +16,9 @@ export default (req, res) => {
         target,
         changeOrigin: true,
         pathRewrite: {
-            '^/proxy': '',
-            '^/upload': ''
+            '^/chat': '',
+            '^/upload': '',
+            '^/loadImg': ''
         },
     });
 

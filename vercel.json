@@ -2,11 +2,15 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/proxy/(.*)",
+      "source": "/chat/(.*)",
       "destination": "/api/proxy"
     },
     {
       "source": "/upload/(.*)",
+      "destination": "/api/proxy"
+    },
+    {
+      "source": "/loadImg/(.*)",
       "destination": "/api/proxy"
     },
     {

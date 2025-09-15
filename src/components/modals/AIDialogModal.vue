@@ -185,7 +185,7 @@ const sendMessage = async () => {
   }) - 1;
 
   try {
-    const response = await fetch('/proxy/v1/chat/completions', {
+    const response = await fetch('/chat/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer RYgyOdUtHftbMIUzLGYn:GHYPENAGGxzUADAarZRc',
