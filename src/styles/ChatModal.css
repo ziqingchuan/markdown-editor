@@ -287,17 +287,33 @@
     height: 25px;
     border-radius: 4px;
     border: none;
-    background-color: rgba(143, 143, 143, 0.65);
+    background-color: #edf2ff;
+    .msg-icon:deep(path) {
+        fill: black;
+    }
 }
-
 .copy-btn:hover, .insert-btn:hover{
-    background-color: #878787;
+    background-color: #dfe6ff;
 }
 
 .copy-btn{
-  transform: translateX(-50%);
+    transform: translateX(-50%);
 }
 
 .insert-btn{
     margin-left: 16px;
+}
+
+.ai-dialog-container.dark-mode .message.ai {
+    .copy-btn, .insert-btn{
+        background-color: rgba(143, 143, 143, 0.65);
+        .msg-icon:deep(path) {
+            fill: white;
+        }
+    }
+
+    .copy-btn:hover, .insert-btn:hover{
+        background-color: #878787;
+    }
+
 }
