@@ -8,7 +8,6 @@ export default (req, res) => {
     else if (req.url.startsWith('/proxy')) {
         target = 'https://spark-api-open.xf-yun.com';
     }
-
     // 创建代理对象并转发请求
     const proxy = createProxyMiddleware({
         target,
