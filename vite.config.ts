@@ -14,6 +14,13 @@ export default defineConfig({
   server: {
     host: true, // 确保可以通过局域网访问
     proxy: {
+      '/api/picgo': {
+        target: 'https://www.picgo.net', // 目标接口域名（picgo的根域名）
+        changeOrigin: true, // 开启跨域：让目标接口认为请求来自「本地代理服务器」，而非前端
+        rewrite: (path) => path.replace(/^\/api\/picgo/, ''), // 重写路径：去掉前缀，还原真实接口路径
+        // 可选：若接口是HTTPS，忽略证书校验（开发环境用，生产环境需关闭）
+        secure: false
+      },
       '/proxy': {
         target: 'https://spark-api-open.xf-yun.com', // 确保地址和端口正确
         changeOrigin: true,

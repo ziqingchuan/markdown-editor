@@ -2,9 +2,10 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 
 export default (req, res) => {
     let target = '';
-
-    // 代理目标地址
-    if (req.url.startsWith('/proxy')) {
+    if (req.url.startsWith('/proxy/picgo')) {
+        target = 'https://www.picgo.net';
+    }
+    else if (req.url.startsWith('/proxy')) {
         target = 'https://spark-api-open.xf-yun.com';
     }
 
