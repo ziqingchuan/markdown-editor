@@ -73,11 +73,11 @@
 }
 /* 激活状态颜色 */
 .upload-icon.red:deep(path) {
-    fill: #f43f7d; /* 无需!important，因为没有内联样式了 */
+    fill: #f43f7d !important; /* 无需!important，因为没有内联样式了 */
 }
 /* 激活状态颜色 */
 .upload-icon.blue:deep(path) {
-    fill: #177ff6; /* 无需!important，因为没有内联样式了 */
+    fill: #177ff6 !important; /* 无需!important，因为没有内联样式了 */
 }
 .upload-btn:hover {
     background-color: #d9d9d9;
