@@ -2,7 +2,9 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 
 export default (req, res) => {
     let target = '';
+    console.log(req.url);
     if (req.url.startsWith('/upload')) {
+        console.log(req.url);
         target = 'https://www.picgo.net';
     }
     else if (req.url.startsWith('/proxy')) {
@@ -14,7 +16,7 @@ export default (req, res) => {
         changeOrigin: true,
         pathRewrite: {
             '^/proxy': '',
-            '^/upload/': ''
+            '^/upload': ''
         },
     });
 
