@@ -262,6 +262,7 @@
       :visible="showAIDialog"
       :is-dark-mode="isDarkMode"
       @close="showAIDialog = false"
+      @insert-msg="handleAIMessageInsert"
   />
 </template>
 
@@ -445,6 +446,13 @@ const handleEmojiSelect = (emojiUnicode: string) => {
   addContentToEditor(emojiUnicode);
   // 关闭弹窗
   showEmojiModal.value = false;
+};
+
+const handleAIMessageInsert = (message: string) => {
+  // 调用现有方法将 Emoji 插入到编辑器光标位置
+  addContentToEditor(message);
+  // 关闭弹窗
+  showAIDialog.value = false;
 };
 
 // 点击空白处关闭下拉菜单

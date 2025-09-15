@@ -274,3 +274,30 @@
 .message.ai :deep(a:hover) {
     text-decoration: underline;
 }
+
+.message-btn {
+    display: flex;
+    flex-direction: row;
+}
+
+.copy-btn, .insert-btn{
+    position: absolute;
+    margin-top: 15px;
+    width: 30px;
+    height: 25px;
+    border-radius: 4px;
+    border: none;
+    background-color: rgba(143, 143, 143, 0.65);
+}
+
+.copy-btn:hover, .insert-btn:hover{
+    background-color: #878787;
+}
+
+.copy-btn{
+  transform: translateX(-50%);
+}
+
+.insert-btn{
+    margin-left: 16px;
+}
