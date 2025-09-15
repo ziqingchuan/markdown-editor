@@ -5,9 +5,6 @@ export default (req, res) => {
     if (req.url.startsWith('/upload')) {
         target = 'https://www.picgo.net';
     }
-    if (req.url.startsWith('/loadImg')) {
-        target = 'https://www.picgo.net';
-    }
     else if (req.url.startsWith('/chat')) {
         target = 'https://spark-api-open.xf-yun.com';
     }
@@ -18,7 +15,6 @@ export default (req, res) => {
         pathRewrite: {
             '^/chat': '',
             '^/upload': '',
-            '^/loadImg': ''
         },
     });
 

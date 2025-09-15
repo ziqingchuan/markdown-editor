@@ -5,8 +5,9 @@
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 import compressImage from "./imageCompressor.ts";
-
+import { useImageStore } from '../stores/useImageStore';
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.mjs';
+const imageStore = useImageStore();
 export const FileUploadHandler = {
     async handleFile(file: File): Promise<string> {
         const extension = file.name.split('.').pop()?.toLowerCase();
@@ -164,7 +165,6 @@ export const FileUploadHandler = {
                     try {
                         // 从FileReader结果中提取Base64，并去掉前缀（如"data:image/png;base64,"）
                         const fullBase64 = event.target?.result as string;
-
                         // 3. 第三步：构造PicGo接口的请求体（含key和source参数）
                         const picGoApiKey = 'chv_ScAYu_34c5279ae9c6ecfc4ef9324ea289b57fe6c5b6f1d54c9664863efe44a156b2181228f3606890670652c60002610a8f44ef950e89253cf25b8e3f62987590bff4'; // 替换为你自己的PicGo API Key
                         const requestBody = new FormData();
@@ -194,6 +194,7 @@ export const FileUploadHandler = {
                         // 6. 第六步：生成最终的Markdown链接（用接口返回的在线URL）
                         const fileName = compressedFile.name.replace(/\.[^/.]+$/, ''); // 去掉文件后缀作为Markdown图片alt
                         const markdownLink = `![${fileName}](${responseData.image.url})`;
+                        imageStore.setImageMap(responseData.image.url, fullBase64);
                         resolve(markdownLink); // 返回最终的Markdown链接
 
                     } catch (uploadError) {

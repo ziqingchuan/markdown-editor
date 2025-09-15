@@ -10,10 +10,6 @@
       "destination": "/api/proxy"
     },
     {
-      "source": "/loadImg/(.*)",
-      "destination": "/api/proxy"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
