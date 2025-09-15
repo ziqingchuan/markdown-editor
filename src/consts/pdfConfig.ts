@@ -110,7 +110,7 @@ export const pdfConfig =  `
       color: #333;
     }
     /* 防止被横向截断 */
-    pre code, p, table {
+    pre code, p, table, li {
         page-break-inside: avoid;
     }
   `;
