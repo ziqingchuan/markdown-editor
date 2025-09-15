@@ -12,7 +12,7 @@
 }
 
 .code-modal {
-    width: 350px;
+    width: 750px;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -53,6 +53,8 @@
 
 .modal-body {
     padding: 16px;
+    scrollbar-width: thin; /* Firefox：设置滚动条宽度（thin/auto/none） */
+    scrollbar-color: rgba(209, 209, 209, 0.5) transparent; /* Firefox：滚动条滑块颜色 + 轨道颜色 */
 }
 
 .form-group {

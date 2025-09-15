@@ -31,7 +31,7 @@
           <textarea
               v-model="codeContent"
               class="code-preview"
-              rows="4"
+              rows="15"
               placeholder="可输入代码块的初始内容..."
           ></textarea>
         </div>

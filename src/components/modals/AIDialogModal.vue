@@ -50,8 +50,8 @@ import {defineEmits, defineProps, nextTick, ref, watch} from 'vue';
 import {marked} from 'marked';
 import markedKatex from 'marked-katex-extension';
 // @ts-ignore
-import Prism from 'prismjs';
-import 'prismjs/themes/prism-tomorrow.css';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css'; // 选择一个喜欢的主题
 
 
 interface Message {
@@ -71,14 +71,16 @@ marked.use(markedKatex({
 // 配置marked高亮代码
 marked.setOptions({
   // @ts-ignore
-  highlight: function (code: string, language: string) {
-    // 检查 Prism 是否支持该语言
-    const validLanguage = Prism.languages[language] ? language : 'plaintext';
-    // 使用 Prism 进行代码高亮
-    return Prism.highlight(code, Prism.languages[validLanguage], validLanguage);
+  highlight: function(code, lang) {
+    // 如果指定了语言且该语言被支持，则使用指定语言高亮
+    if (lang && hljs.getLanguage(lang)) {
+      return hljs.highlight(code, { language: lang }).value;
+    }
+    // 否则使用自动检测
+    return hljs.highlightAuto(code).value;
   },
-  breaks: true, // 支持换行
-  gfm: true // 支持GFM语法
+  breaks: true,
+  gfm: true
 });
 
 const props = defineProps<{
@@ -220,8 +222,19 @@ watch([messages, () => props.visible], () => {
     const previewContainer = document.querySelector('.messages-container');
     if (previewContainer) {
       previewContainer.querySelectorAll('pre code').forEach((block) => {
-        // 使用 Prism 进行代码高亮
-        Prism.highlightElement(block as HTMLElement);
+        // 使用 highlight.js 进行代码高亮
+        // 获取语言类型（从 class 中提取，如 language-javascript）
+        const langClass = Array.from(block.classList).find(c => c.startsWith('language-'));
+        const lang = langClass ? langClass.split('-')[1] : null;
+
+        if (lang && hljs.getLanguage(lang)) {
+          // 已知语言高亮
+          hljs.highlightElement(block as HTMLElement);
+        } else {
+          // 自动检测语言
+          // @ts-ignore
+          hljs.highlightAuto(block as HTMLElement);
+        }
       });
     }
   });

@@ -1,6 +1,7 @@
 import {pdfConfig} from "../consts/pdfConfig.ts";
 // @ts-ignore
-import Prism from 'prismjs';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css'; // 选择一个喜欢的主题
 
 export const markdownHandler = (markdown: string) => {
     const blob = new Blob([markdown], { type: 'text/markdown' });
@@ -89,7 +90,17 @@ export const pdfHandler = async (renderedMarkdown: any, mermaidInstance: any) =>
 
     // 3. 代码高亮
     tempElement.querySelectorAll('pre code').forEach((block) => {
-        Prism.highlightElement(block as HTMLElement);
+        const langClass = Array.from(block.classList).find(c => c.startsWith('language-'));
+        const lang = langClass ? langClass.split('-')[1] : null;
+
+        if (lang && hljs.getLanguage(lang)) {
+            // 已知语言高亮
+            hljs.highlightElement(block as HTMLElement);
+        } else {
+            // 自动检测语言
+            // @ts-ignore
+            hljs.highlightAuto(block as HTMLElement);
+        }
     });
 
     // 4. 设置临时元素基础样式

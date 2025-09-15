@@ -124,6 +124,7 @@
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
     margin-bottom: 1rem;
+    font-size: 0.8rem;
 }
 
 :deep(pre)::-webkit-scrollbar {
@@ -141,6 +142,8 @@
     border-radius: 5px;
     background-color: rgba(231, 231, 231, 0.89);
     color: #3a7bde;
+    scrollbar-width: thin; /* Firefox：设置滚动条宽度（thin/auto/none） */
+    scrollbar-color: rgba(209, 209, 209, 0.5) transparent; /* Firefox：滚动条滑块颜色 + 轨道颜色 */
 }
 
 .app-dark :deep(code) {

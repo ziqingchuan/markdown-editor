@@ -32,13 +32,13 @@ export default defineConfig({
         manualChunks: {
           // 将大型库单独打包
           html2pdf: ['html2pdf.js'],
+          highlightjs: ['highlight.js'],
           marked: ['marked'],
           mermaid: ['mermaid'],
           dompurify: ['dompurify'],
           compressorjs: ['compressorjs'],
           mammoth: ['mammoth'],
           pdfjsDist: ['pdfjs-dist'],
-          prismjs: ['prismjs'],
         }
       }
     },
