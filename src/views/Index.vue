@@ -27,15 +27,15 @@
             <div class="dropdown-menu" :class="{ 'dropdown-show': showDropdown }" @click.stop>
               <!-- 下载选项 -->
               <div class="dropdown-options">
-                <div class="dropdown-item" @click="downloadMarkdown">
+                <div class="dropdown-item" @click="showDownloadModal = true; downloadType = 'md'">
                   <svg class="file-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="48" height="48"><path d="M941.335155 482.458783h-26.358201V220.474241a9.5848 9.5848 0 0 0-0.575088-3.194933 9.5848 9.5848 0 0 0-2.236453-10.000142l-204.47574-204.47574A9.5848 9.5848 0 0 0 691.331614 9.608635v204.475739a9.5848 9.5848 0 0 0 9.5848 9.584801h194.89094v258.789608h-747.614424V20.790902h500.007082a9.5848 9.5848 0 0 0 0-19.169601H138.608129a9.5848 9.5848 0 0 0-9.5848 9.5848V482.458783h-26.358201a27.955668 27.955668 0 0 0-27.955667 27.955667v327.480677a27.955668 27.955668 0 0 0 27.955667 27.955668h26.358201v52.173263a106.07179 106.07179 0 0 0 105.943993 105.975942h670.424832a9.5848 9.5848 0 0 0 9.5848-9.5848V865.850795h26.358201a27.955668 27.955668 0 0 0 27.955667-27.955668v-327.480677a27.955668 27.955668 0 0 0-27.955667-27.955667z m-230.833941-277.959209V32.739953L882.228886 204.499574z m-80.576221 353.104043l34.473332 157.094877 41.821678-157.094877H761.204808l40.096415 159.746672 35.144267-159.746672h46.486282l-55.655741 228.693335h-48.978329l-45.559751-170.992837-45.400004 170.992837h-50.064607l-54.601412-228.693335z m-172.526405 0h48.818582l91.726539 228.693335h-50.224353l-19.968334-51.949617h-91.407046l-18.882056 51.949617h-48.97833z m-296.393975 0h97.349622q36.645886 0 53.25954 6.166222a52.556655 52.556655 0 0 1 26.613795 21.917243 65.911477 65.911477 0 0 1 10.000142 36.038849 61.055178 61.055178 0 0 1-15.143984 42.492615q-15.143984 16.773401-45.240258 21.150459a107.829003 107.829003 0 0 1 24.728785 19.169601 260.930214 260.930214 0 0 1 26.294302 37.125126l27.923718 44.729068H311.549876l-33.387054-49.840961A322.879973 322.879973 0 0 0 253.817429 702.90919a35.463761 35.463761 0 0 0-13.89796-9.5848 76.103314 76.103314 0 0 0-23.259116-2.587897h-9.329205v95.560459H161.16436z m734.642994 447.290681H234.967322a86.902189 86.902189 0 0 1-86.806342-86.806341V865.850795h747.614424z" fill="#FFC152"></path><path d="M481.424487 610.959006l-30.895006 84.857432h62.39705l-31.502044-84.857432zM282.987171 651.502711a24.888531 24.888531 0 0 0 12.939481-9.5848 29.77678 29.77678 0 0 0 4.664603-17.156793 27.444478 27.444478 0 0 0-6.166222-18.626462 28.275161 28.275161 0 0 0-17.380438-8.977763q-5.623083-0.766784-33.706548-0.766784H207.331148v58.019991h34.153838q33.227308-0.095848 41.502185-2.907389z" fill="#FFC152"></path></svg>
                   <span>Markdown文件</span>
                 </div>
-                <div class="dropdown-item" @click="downloadPdf">
+                <div class="dropdown-item" @click="showDownloadModal = true; downloadType = 'pdf'">
                   <svg class="file-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="48" height="48"><path d="M330.399984 670.065274a30.319918 30.319918 0 0 0 14.441099-11.246166 30.767209 30.767209 0 0 0 5.207741-17.795779 29.553134 29.553134 0 0 0-7.316397-20.60732 31.949334 31.949334 0 0 0-18.562564-10.127939 222.047874 222.047874 0 0 0-33.227307-1.565518h-22.364534v64.889098h25.271923q27.34863 0.031949 36.550039-3.546376zM562.607746 748.532839q7.412246-6.70936 12.076848-22.07699a149.171442 149.171442 0 0 0 4.664603-41.885577q0-26.517948-4.664603-40.703452a52.33301 52.33301 0 0 0-13.099227-22.140889 43.962284 43.962284 0 0 0-21.374105-10.766925q-9.5848-2.172555-37.92386-2.172555h-20.735118v151.471794h34.473332a125.75258 125.75258 0 0 0 27.923718-2.172555 42.620412 42.620412 0 0 0 18.658412-9.552851z" fill="#FF0741"></path><path d="M938.044374 482.458783h-26.358201V220.474241a9.5848 9.5848 0 0 0-0.575088-3.194933 9.5848 9.5848 0 0 0-2.236454-10.000142l-204.47574-204.47574A9.5848 9.5848 0 0 0 688.040832 9.608635v204.475739a9.5848 9.5848 0 0 0 9.584801 9.584801h194.890939v258.789608h-747.614424V20.790902h500.007083a9.5848 9.5848 0 0 0 0-19.169601H135.317348a9.5848 9.5848 0 0 0-9.5848 9.5848V482.458783h-26.358201a27.955668 27.955668 0 0 0-27.955668 27.955667v327.480677a27.955668 27.955668 0 0 0 27.955668 27.955668h26.358201v52.173263a106.07179 106.07179 0 0 0 105.943992 105.975942H902.101372a9.5848 9.5848 0 0 0 9.584801-9.5848V865.850795h26.358201a27.955668 27.955668 0 0 0 27.955667-27.955668v-327.480677a27.955668 27.955668 0 0 0-27.955667-27.955667zM707.210433 204.499574V32.739953L878.970054 204.499574z m-40.607604 365.564284h156.775384v38.690644h-110.608596v54.122172h95.464611v38.690644h-95.464611V798.757193h-46.166788z m-231.185383 0h84.410141q28.562705 0 43.514993 4.377058a76.486706 76.486706 0 0 1 34.473332 21.054612 99.969467 99.969467 0 0 1 21.853345 37.061228 168.788333 168.788333 0 0 1 7.348347 54.026324 150.161871 150.161871 0 0 1-7.028854 48.658836 100.832099 100.832099 0 0 1-24.505139 40.415908 81.183259 81.183259 0 0 1-32.364676 18.275019 139.65054 139.65054 0 0 1-40.831249 4.82435H435.321598z m-212.942314 0h74.090507q42.109223 0 54.920905 3.418578a59.968901 59.968901 0 0 1 32.907815 22.364534q13.258974 17.252641 13.258973 44.537373a74.601696 74.601696 0 0 1-7.635891 35.399862 62.716543 62.716543 0 0 1-19.425195 22.55623 67.093602 67.093602 0 0 1-23.962001 10.830824 263.613958 263.613958 0 0 1-47.924001 3.194934h-30.064324v86.263203H222.443183zM892.516572 1004.830399H231.67654a86.902189 86.902189 0 0 1-86.774392-86.806341V865.850795h747.614424z" fill="#FF0741"></path></svg>
                   <span>PDF文件</span>
                 </div>
-                <div class="dropdown-item" @click="downloadHtml">
+                <div class="dropdown-item" @click="showDownloadModal = true; downloadType = 'html'">
                   <svg class="file-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="48" height="48"><path d="M940.344726 482.458783h-26.358201V220.474241a9.5848 9.5848 0 0 0-0.575088-3.194933 9.5848 9.5848 0 0 0-2.236454-10.000142l-204.475739-204.47574A9.5848 9.5848 0 0 0 690.341184 9.608635v204.475739a9.5848 9.5848 0 0 0 9.584801 9.584801h194.890939v258.789608h-747.614424V20.790902h500.007083a9.5848 9.5848 0 0 0 0-19.169601H137.6177a9.5848 9.5848 0 0 0-9.5848 9.5848V482.458783h-26.358201a27.955668 27.955668 0 0 0-27.955668 27.955667v327.480677a27.955668 27.955668 0 0 0 27.955668 27.955668h26.358201v52.173263A106.07179 106.07179 0 0 0 234.040791 1024h670.360933a9.5848 9.5848 0 0 0 9.584801-9.5848V865.850795h26.358201a27.955668 27.955668 0 0 0 27.955667-27.955668v-327.480677a27.955668 27.955668 0 0 0-27.955667-27.955667z m-230.833941-277.959209V32.739953L881.270406 204.499574z m-190.322185 367.417345h64.537656l38.754542 145.688965 38.339201-145.688965h64.665453v213.549351h-40.096415v-168.085448L642.992271 785.46627h-41.534135l-42.23702-168.117398v168.117398h-40.032516z m-196.967646 0h169.714864v36.134697h-63.227733v177.446603h-43.131601v-177.446603H322.220954zM122.218121 785.46627V571.916919h43.131601v84.058699h84.47404V571.916919h43.131602v213.549351h-43.131602v-93.355955H165.317773v93.387904z m772.598803 219.364129H234.040791a86.902189 86.902189 0 0 1-86.806341-86.806341V865.850795h747.614423z m24.98438-219.364129h-150.353568v-211.824087h43.131602v175.721339h107.221966z" fill="#697BC9"></path></svg>
                   <span>HTML文件</span>
                 </div>
@@ -264,6 +264,15 @@
       @close="showAIDialog = false"
       @insert-msg="handleAIMessageInsert"
   />
+    <!-- 下载文件自定义名称弹窗 -->
+  <DownloadModal
+      :visible="showDownloadModal"
+      :is-dark-mode="isDarkMode"
+      :fileType="downloadType"
+      @close="showDownloadModal = false"
+      @confirm="handleDownloadConfirm"
+      @error="(msg: any) => showCustomToast(msg, 'error')"
+  />
 </template>
 
 <script setup lang="ts">
@@ -291,6 +300,7 @@ const EmojiModal = defineAsyncComponent(() => import('../components/modals/Emoji
 const JsonSchemaModal = defineAsyncComponent(() => import('../components/modals/JsonSchemaModal.vue'));
 const DailyNotice = defineAsyncComponent(() => import("../components/modals/DailyNotice.vue"));
 const AIDialogModal = defineAsyncComponent(() => import("../components/modals/AIDialogModal.vue"));
+const DownloadModal = defineAsyncComponent(() => import("../components/modals/DownloadModal.vue"));
 const CustomToast = defineAsyncComponent(() => import('../components/CustomToast.vue'));
 const TextToolbar = defineAsyncComponent(() => import("../components/TextToolbar.vue"));
 // 状态管理
@@ -303,6 +313,7 @@ const toastType = ref('success'); // success/error
 const onlyEdit = ref(false); // 编辑模式
 const onlyPreview = ref(false); // 预览模式
 const showAIDialog = ref(false);
+const showDownloadModal = ref(false);
 const showDailyNotice = ref(false);
 // 获取DOM引用
 const editorRef = ref<HTMLTextAreaElement>();
@@ -320,6 +331,7 @@ const showJsonModal = ref(false);
 const isFullScreen = ref(false); // 全屏状态
 const isHtmlMode = ref(false);
 const renderMermaid = ref(false);
+const downloadType = ref('md');
 // 本地存储相关的代码
 const STORAGE_KEY = 'markdown-editor-content';
 const THEME_KEY = 'markdown-editor-theme';
@@ -467,13 +479,32 @@ const handleClickOutside = (e: any) => {
  * ================================================== 下载相关功能 ==================================================
  */
 
+
+const handleDownloadConfirm = (fileName: string, fileType: string) => {
+  switch (fileType) {
+    case 'md':
+      downloadMarkdown(fileName);
+      break;
+    case 'html':
+      downloadHtml(fileName);
+      break;
+    case 'pdf':
+      downloadPdf(fileName);
+      break;
+    default:
+      downloadMarkdown(fileName);
+      break;
+  }
+  showDownloadModal.value = false;
+}
+
 // 下载Markdown文件
-const downloadMarkdown = async () => {
+const downloadMarkdown = async (fileName: string) => {
   showDropdown.value = false;
   try {
     // 动态导入downloadHandler.ts
     const { markdownHandler } = await import("../utils/downloadHandler.ts");
-    markdownHandler(markdownContent.value);
+    markdownHandler(markdownContent.value, fileName);
     showCustomToast('Markdown文件下载成功');
   } catch (error: any) {
     showCustomToast('下载失败：' + error.message, 'error');
@@ -481,11 +512,11 @@ const downloadMarkdown = async () => {
 };
 
 // 下载html文件
-const downloadHtml = async () => {
+const downloadHtml = async (fileName: string) => {
   showDropdown.value = false;
   try {
     const { htmlHandler } = await import("../utils/downloadHandler.ts");
-    htmlHandler(markdownContent.value);
+    htmlHandler(markdownContent.value, fileName);
     showCustomToast('html代码下载成功');
   } catch (error: any) {
     showCustomToast('下载失败：' + error.message, 'error');
@@ -493,7 +524,7 @@ const downloadHtml = async () => {
 };
 
 // 下载PDF文件
-const downloadPdf = async () => {
+const downloadPdf = async (fileName: string) => {
   showDropdown.value = false;
   isLoading.value = true;
   let tempElement: any;
@@ -518,6 +549,7 @@ const downloadPdf = async () => {
     tempElement = await pdfHandler(renderedMarkdown, mermaid);
     // document.body.appendChild(tempElement);
     const {pdfOptions} = await import("../consts/pdfConfig.ts");
+    pdfOptions.filename = fileName ? `${fileName}.pdf`: '素笔Mark导出文档.pdf';
     await html2pdf().from(tempElement).set(pdfOptions).save();
     // 清理页面多余的报错信息元素
     document.querySelectorAll('[id^="dmermaid-pdf"]').forEach(el => el.remove());

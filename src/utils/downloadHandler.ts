@@ -3,24 +3,24 @@ import {pdfConfig} from "../consts/pdfConfig.ts";
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css'; // 选择一个喜欢的主题
 
-export const markdownHandler = (markdown: string) => {
+export const markdownHandler = (markdown: string, fileName: string) => {
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = '素笔Mark导出文档.md';
+    a.download = fileName ? `${fileName}.md` : '素笔Mark导出文档.md';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
 
-export const htmlHandler = (html: string) => {
+export const htmlHandler = (html: string, fileName: string) => {
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = '素笔Mark导出html.html';
+    a.download = fileName ? `${fileName}.html` : '素笔Mark导出html.html';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
