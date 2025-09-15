@@ -174,7 +174,7 @@ export const FileUploadHandler = {
                         requestBody.append('title', compressedFile.name); // 可选：自定义图片文件名（接口若支持）
                         requestBody.append('format', 'json');
                         // 4. 第四步：发起POST请求到PicGo上传接口
-                        const response = await fetch('/upload/picgo/api/1/upload', {
+                        const response = await fetch('/upload/api/1/upload', {
                             method: 'POST',
                             body: requestBody,
                         });
