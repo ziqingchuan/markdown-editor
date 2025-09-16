@@ -188,7 +188,7 @@ const sendMessage = async () => {
     const response = await fetch('/chat/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer RYgyOdUtHftbMIUzLGYn:GHYPENAGGxzUADAarZRc',
+        'Authorization': `Bearer ${import.meta.env.VITE_CHAT_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
