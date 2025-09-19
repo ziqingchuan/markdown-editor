@@ -6,6 +6,7 @@ import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 import compressImage from "./imageCompressor.ts";
 import { useImageStore } from '../stores/useImageStore';
+import {VITE_PICGO_API_KEY} from "../consts/secretKeys.ts";
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.mjs';
 const imageStore = useImageStore();
 export const FileUploadHandler = {
@@ -166,9 +167,8 @@ export const FileUploadHandler = {
                         // 从FileReader结果中提取Base64，并去掉前缀（如"data:image/png;base64,"）
                         const fullBase64 = event.target?.result as string;
                         // 3. 第三步：构造PicGo接口的请求体（含key和source参数）
-                        const picGoApiKey =  import.meta.env.VITE_PICGO_API_KEY; // 替换为你自己的PicGo API Key
                         const requestBody = new FormData();
-                        requestBody.append('key', picGoApiKey); // 接口要求的「key」参数（API密钥）
+                        requestBody.append('key', VITE_PICGO_API_KEY); // 接口要求的「key」参数（API密钥）
                         requestBody.append('source', file);
                         requestBody.append('album_id', 'kdQyG');
                         requestBody.append('title', compressedFile.name); // 可选：自定义图片文件名（接口若支持）

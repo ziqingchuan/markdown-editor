@@ -75,7 +75,8 @@ import {marked} from 'marked';
 import markedKatex from 'marked-katex-extension';
 // @ts-ignore
 import hljs from 'highlight.js';
-import 'highlight.js/styles/github-dark.css'; // 选择一个喜欢的主题
+import 'highlight.js/styles/github-dark.css';
+import {VITE_CHAT_API_KEY} from "../../consts/secretKeys.ts"; // 选择一个喜欢的主题
 
 
 interface Message {
@@ -188,7 +189,7 @@ const sendMessage = async () => {
     const response = await fetch('/chat/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${import.meta.env.VITE_CHAT_API_KEY}`,
+        'Authorization': `Bearer ${VITE_CHAT_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
