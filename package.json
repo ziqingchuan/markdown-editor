@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/highlight.js": "^9.12.4",
+    "@types/html2pdf.js": "^0.10.0",
     "@types/lodash-es": "^4.17.12",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
